@@ -1,0 +1,30 @@
+from enum import Enum
+
+class PaymentStatus(str, Enum):
+    PENDING = "PENDING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    REFUNDED = "REFUNDED"
+
+class MerchantCategory(str, Enum):
+    RESTAURANT = "RESTAURANT"
+    RETAIL_STORE = "RETAIL_STORE"
+    GAS_STATION = "GAS_STATION"
+    AIRLINE = "AIRLINE"
+    HOTEL = "HOTEL"
+    E_COMMERCE = "E_COMMERCE"
+    GROCERY_STORE = "GROCERY_STORE"
+    PHARMACY = "PHARMACY"
+    ENTERTAINMENT_VENUE = "ENTERTAINMENT_VENUE"
+    HEALTHCARE_PROVIDER = "HEALTHCARE_PROVIDER"
+
+class ProductType(str, Enum):
+    PLATINUM = "PLATINUM"
+    GOLD = "GOLD"
+    SILVER = "SILVER"
+    BASIC = "BASIC"
+
+class RewardStatus(str, Enum):
+    EARNED = "EARNED"
+    REDEEMED = "REDEEMED"
+    EXPIRED = "EXPIRED"

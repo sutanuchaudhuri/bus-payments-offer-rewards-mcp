@@ -1,0 +1,927 @@
+openapi: 3.0.0
+info:
+  title: Credit Card Payment System API
+  description: Comprehensive API for credit card payment simulations with merchants, offers, rewards, and profile history
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:5001
+    description: Development server
+
+paths:
+  # Health Check
+  /api/health:
+    get:
+      summary: Health check endpoint
+      tags:
+        - Health
+      responses:
+        200:
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  # Root endpoint
+  /:
+    get:
+      summary: API information
+      tags:
+        - General
+      responses:
+        200:
+          description: API information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  version:
+                    type: string
+                  docs:
+                    type: string
+                  health:
+                    type: string
+
+  # Customer Endpoints
+  /api/customers:
+    get:
+      summary: List all customers
+      tags:
+        - Customers
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: email
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of customers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  customers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Customer'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  per_page:
+                    type: integer
+                  pages:
+                    type: integer
+
+    post:
+      summary: Create new customer
+      tags:
+        - Customers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerCreate'
+      responses:
+        201:
+          description: Customer created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        400:
+          description: Validation error
+
+  /api/customers/{customer_id}:
+    get:
+      summary: Get customer details
+      tags:
+        - Customers
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Customer details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        404:
+          description: Customer not found
+
+    put:
+      summary: Update customer
+      tags:
+        - Customers
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerUpdate'
+      responses:
+        200:
+          description: Customer updated successfully
+        404:
+          description: Customer not found
+
+    delete:
+      summary: Delete customer
+      tags:
+        - Customers
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Customer deleted successfully
+        404:
+          description: Customer not found
+
+  # Credit Card Endpoints
+  /api/customers/{customer_id}/cards:
+    post:
+      summary: Add credit card to customer
+      tags:
+        - Credit Cards
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditCardCreate'
+      responses:
+        201:
+          description: Credit card added successfully
+        400:
+          description: Validation error
+
+  # Merchant Endpoints
+  /api/merchants:
+    get:
+      summary: List all merchants
+      tags:
+        - Merchants
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: is_active
+          in: query
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: List of merchants
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  merchants:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Merchant'
+                  total:
+                    type: integer
+
+    post:
+      summary: Create new merchant
+      tags:
+        - Merchants
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MerchantCreate'
+      responses:
+        201:
+          description: Merchant created successfully
+
+  /api/merchants/{merchant_id}:
+    get:
+      summary: Get merchant details
+      tags:
+        - Merchants
+      parameters:
+        - name: merchant_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Merchant details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Merchant'
+
+  /api/merchants/{merchant_id}/analytics:
+    get:
+      summary: Get merchant analytics
+      tags:
+        - Merchants
+      parameters:
+        - name: merchant_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Merchant analytics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_transactions:
+                    type: integer
+                  total_amount:
+                    type: number
+                  total_discounts:
+                    type: number
+                  active_offers:
+                    type: integer
+
+  # Payment Endpoints
+  /api/payments:
+    get:
+      summary: List payments
+      tags:
+        - Payments
+      parameters:
+        - name: customer_id
+          in: query
+          schema:
+            type: integer
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, COMPLETED, FAILED, REFUNDED]
+      responses:
+        200:
+          description: List of payments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Payment'
+                  total:
+                    type: integer
+
+    post:
+      summary: Make a payment
+      tags:
+        - Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentCreate'
+      responses:
+        201:
+          description: Payment processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payment:
+                    $ref: '#/components/schemas/Payment'
+                  rewards_earned:
+                    type: integer
+                  offers_applied:
+                    type: array
+                    items:
+                      type: object
+
+  # Offer Endpoints
+  /api/offers:
+    get:
+      summary: List offers
+      tags:
+        - Offers
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: merchant_id
+          in: query
+          schema:
+            type: integer
+        - name: is_active
+          in: query
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: List of offers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  offers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Offer'
+
+    post:
+      summary: Create new offer
+      tags:
+        - Offers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OfferCreate'
+      responses:
+        201:
+          description: Offer created successfully
+
+  /api/offers/{offer_id}/activate:
+    post:
+      summary: Activate offer for customer
+      tags:
+        - Offers
+      parameters:
+        - name: offer_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customer_id:
+                  type: integer
+      responses:
+        201:
+          description: Offer activated successfully
+
+  # Rewards Endpoints
+  /api/rewards/customer/{customer_id}:
+    get:
+      summary: Get customer rewards
+      tags:
+        - Rewards
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Customer rewards
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rewards:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Reward'
+
+  /api/rewards/customer/{customer_id}/balance:
+    get:
+      summary: Get customer reward balance
+      tags:
+        - Rewards
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Customer reward balance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_points:
+                    type: integer
+                  available_points:
+                    type: integer
+                  dollar_value:
+                    type: number
+
+  /api/rewards/customer/{customer_id}/redeem:
+    post:
+      summary: Redeem points
+      tags:
+        - Rewards
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                points:
+                  type: integer
+                description:
+                  type: string
+      responses:
+        200:
+          description: Points redeemed successfully
+
+  # Profile History Endpoints
+  /api/profile-history:
+    get:
+      summary: List profile history
+      tags:
+        - Profile History
+      parameters:
+        - name: customer_id
+          in: query
+          schema:
+            type: integer
+        - name: merchant_id
+          in: query
+          schema:
+            type: integer
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        200:
+          description: Profile history entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  history:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CustomerProfileHistory'
+
+  /api/profile-history/customer/{customer_id}:
+    get:
+      summary: Get customer profile history
+      tags:
+        - Profile History
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Customer profile history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  history:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CustomerProfileHistory'
+                  total_saved:
+                    type: number
+
+components:
+  schemas:
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        date_of_birth:
+          type: string
+          format: date
+        address:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CustomerCreate:
+      type: object
+      required:
+        - first_name
+        - last_name
+        - email
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        date_of_birth:
+          type: string
+          format: date
+        address:
+          type: string
+
+    CustomerUpdate:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        date_of_birth:
+          type: string
+          format: date
+        address:
+          type: string
+
+    Merchant:
+      type: object
+      properties:
+        id:
+          type: integer
+        merchant_id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        website:
+          type: string
+        contact_email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    MerchantCreate:
+      type: object
+      required:
+        - merchant_id
+        - name
+        - category
+      properties:
+        merchant_id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum:
+            - RESTAURANT
+            - RETAIL_STORE
+            - GAS_STATION
+            - AIRLINE
+            - HOTEL
+            - E_COMMERCE
+            - GROCERY_STORE
+            - PHARMACY
+            - ENTERTAINMENT_VENUE
+            - HEALTHCARE_PROVIDER
+        website:
+          type: string
+        contact_email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+        credit_card_id:
+          type: integer
+        amount:
+          type: number
+        merchant_name:
+          type: string
+        merchant_category:
+          type: string
+        transaction_date:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PENDING, COMPLETED, FAILED, REFUNDED]
+        reference_number:
+          type: string
+        description:
+          type: string
+
+    PaymentCreate:
+      type: object
+      required:
+        - credit_card_id
+        - amount
+        - merchant_name
+      properties:
+        credit_card_id:
+          type: integer
+        amount:
+          type: number
+        merchant_name:
+          type: string
+        merchant_category:
+          type: string
+        description:
+          type: string
+
+    CreditCardCreate:
+      type: object
+      required:
+        - card_number
+        - card_holder_name
+        - expiry_month
+        - expiry_year
+        - product_type
+        - credit_limit
+      properties:
+        card_number:
+          type: string
+        card_holder_name:
+          type: string
+        expiry_month:
+          type: integer
+        expiry_year:
+          type: integer
+        product_type:
+          type: string
+          enum: [PLATINUM, GOLD, SILVER, BASIC]
+        credit_limit:
+          type: number
+
+    Offer:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        merchant_id:
+          type: integer
+        merchant_name:
+          type: string
+        discount_percentage:
+          type: number
+        max_discount_amount:
+          type: number
+        min_transaction_amount:
+          type: number
+        reward_points:
+          type: integer
+        start_date:
+          type: string
+          format: date-time
+        expiry_date:
+          type: string
+          format: date-time
+        is_active:
+          type: boolean
+
+    OfferCreate:
+      type: object
+      required:
+        - title
+        - category
+        - start_date
+        - expiry_date
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        merchant_id:
+          type: integer
+        discount_percentage:
+          type: number
+        max_discount_amount:
+          type: number
+        min_transaction_amount:
+          type: number
+        reward_points:
+          type: integer
+        start_date:
+          type: string
+          format: date-time
+        expiry_date:
+          type: string
+          format: date-time
+        terms_and_conditions:
+          type: string
+
+    Reward:
+      type: object
+      properties:
+        id:
+          type: integer
+        customer_id:
+          type: integer
+        payment_id:
+          type: integer
+        offer_id:
+          type: integer
+        points_earned:
+          type: integer
+        points_redeemed:
+          type: integer
+        dollar_value:
+          type: number
+        status:
+          type: string
+          enum: [EARNED, REDEEMED, EXPIRED]
+        earned_date:
+          type: string
+          format: date-time
+        redeemed_date:
+          type: string
+          format: date-time
+        expiry_date:
+          type: string
+          format: date-time
+        description:
+          type: string
+
+    CustomerProfileHistory:
+      type: object
+      properties:
+        id:
+          type: integer
+        customer_id:
+          type: integer
+        customer_name:
+          type: string
+        merchant_id:
+          type: integer
+        merchant_name:
+          type: string
+        offer_id:
+          type: integer
+        offer_title:
+          type: string
+        payment_id:
+          type: integer
+        amount_availed:
+          type: number
+        transaction_amount:
+          type: number
+        savings_percentage:
+          type: number
+        statement_descriptor:
+          type: string
+        availed_date:
+          type: string
+          format: date-time
+        offer_category:
+          type: string
+        merchant_category:
+          type: string
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: General
+    description: General API information
+  - name: Customers
+    description: Customer management
+  - name: Credit Cards
+    description: Credit card management
+  - name: Merchants
+    description: Merchant management
+  - name: Payments
+    description: Payment processing
+  - name: Offers
+    description: Offer management
+  - name: Rewards
+    description: Rewards system
+  - name: Profile History
+    description: Customer profile history
