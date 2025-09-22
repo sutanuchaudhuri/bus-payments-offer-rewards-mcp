@@ -34,7 +34,7 @@ if __name__ == "__main__":
     # Run the MCP server
     print("Starting Credit Card Payment System MCP Server...")
     print("Available tools have been registered and are ready for use.")
-    mcp.run(transport="stdio")
+    mcp.run(transport="sse")
     # mcp.run(transport="http", port=8000)
 
     # In a real implementation, you might want to run this differently
