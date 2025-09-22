@@ -1,63 +1,85 @@
 # Enums
-from .enums import PaymentStatus, MerchantCategory, ProductType, RewardStatus
+from .enums import *
+from .base_client import api_client, APIClient
 
 # Entity Models
-from .customer import Customer, CustomerCreate, CustomerUpdate
-from .merchant import Merchant, MerchantCreate
-from .payment import Payment, PaymentCreate
-from .credit_card import CreditCardCreate
-from .offer import Offer, OfferCreate, OfferActivationRequest
-from .reward import Reward, RedeemPointsRequest
-from .profile_history import CustomerProfileHistory
+from .customer import Customer, CustomerCreate, CustomerUpdate, CustomerListResponse
+from .credit_card import CreditCard, CreditCardCreate, CreditCardUpdate, CreditCardListResponse
+from .merchant import (
+    Merchant, MerchantCreate, MerchantUpdate, MerchantListResponse,
+    MerchantCategoryInfo, MerchantCategoriesResponse, MerchantAnalytics
+)
+from .offer import (
+    Offer, OfferCreate, OfferUpdate, OfferActivationRequest, OfferActivation,
+    OfferListResponse, OfferCategoryInfo, OfferCategoriesResponse, OfferStatistics
+)
+from .payment import (
+    Payment, PaymentCreate, PaymentRefund, PaymentListResponse, SpendingAnalytics
+)
+from .reward import (
+    Reward, RewardCreate, RedeemPointsRequest, RewardRedemption, CustomerBalance,
+    RewardListResponse, RedemptionHistory
+)
+from .refund import (
+    Refund, RefundRequest, PointsRefundRequest, RefundApproval, RefundDenial,
+    RefundListResponse
+)
+from .booking import (
+    Booking, BookingModification, BookingStatusResponse, HotelSearchRequest,
+    HotelBookingRequest, FlightSearchRequest, FlightBookingRequest, TravelPackageSearchRequest
+)
+from .integrations import (
+    CardToken, CardTokenRequest, TokenValidationResponse, ShoppingProductSearch,
+    ShoppingCartItem, ShoppingOrder, IntegrationStatus
+)
+from .profile_history import (
+    CustomerProfileHistory, ProfileHistoryResponse, CustomerProfileHistoryResponse
+)
 
 # Response Models
-from .responses import (
-    HealthResponse,
-    CustomerListResponse,
-    MerchantListResponse,
-    PaymentListResponse,
-    OfferListResponse,
-    RewardListResponse,
-    RewardBalanceResponse,
-    ProfileHistoryResponse,
-    CustomerProfileHistoryResponse,
-    PaymentResponse,
-    MerchantAnalyticsResponse
-)
+from .responses import *
 
 __all__ = [
     # Enums
-    "PaymentStatus",
-    "MerchantCategory",
-    "ProductType",
-    "RewardStatus",
+    "BookingStatus", "CreditCardProduct", "MerchantCategory", "OfferCategory",
+    "PaymentStatus", "RefundStatus", "RefundType", "RewardStatus", "TokenType",
 
-    # Entity Models
-    "Customer",
-    "CustomerCreate",
-    "CustomerUpdate",
-    "Merchant",
-    "MerchantCreate",
-    "Payment",
-    "PaymentCreate",
-    "CreditCardCreate",
-    "Offer",
-    "OfferCreate",
-    "OfferActivationRequest",
-    "Reward",
-    "RedeemPointsRequest",
-    "CustomerProfileHistory",
+    # Client
+    "api_client", "APIClient",
 
-    # Response Models
-    "HealthResponse",
-    "CustomerListResponse",
-    "MerchantListResponse",
-    "PaymentListResponse",
-    "OfferListResponse",
-    "RewardListResponse",
-    "RewardBalanceResponse",
-    "ProfileHistoryResponse",
-    "CustomerProfileHistoryResponse",
-    "PaymentResponse",
-    "MerchantAnalyticsResponse"
+    # Customer models
+    "Customer", "CustomerCreate", "CustomerUpdate", "CustomerListResponse",
+
+    # Credit Card models
+    "CreditCard", "CreditCardCreate", "CreditCardUpdate", "CreditCardListResponse",
+
+    # Merchant models
+    "Merchant", "MerchantCreate", "MerchantUpdate", "MerchantListResponse",
+    "MerchantCategoryInfo", "MerchantCategoriesResponse", "MerchantAnalytics",
+
+    # Offer models
+    "Offer", "OfferCreate", "OfferUpdate", "OfferActivationRequest", "OfferActivation",
+    "OfferListResponse", "OfferCategoryInfo", "OfferCategoriesResponse", "OfferStatistics",
+
+    # Payment models
+    "Payment", "PaymentCreate", "PaymentRefund", "PaymentListResponse", "SpendingAnalytics",
+
+    # Reward models
+    "Reward", "RewardCreate", "RedeemPointsRequest", "RewardRedemption", "CustomerBalance",
+    "RewardListResponse", "RedemptionHistory",
+
+    # Refund models
+    "Refund", "RefundRequest", "PointsRefundRequest", "RefundApproval", "RefundDenial",
+    "RefundListResponse",
+
+    # Booking models
+    "Booking", "BookingModification", "BookingStatusResponse", "HotelSearchRequest",
+    "HotelBookingRequest", "FlightSearchRequest", "FlightBookingRequest", "TravelPackageSearchRequest",
+
+    # Integration models
+    "CardToken", "CardTokenRequest", "TokenValidationResponse", "ShoppingProductSearch",
+    "ShoppingCartItem", "ShoppingOrder", "IntegrationStatus",
+
+    # Profile History models
+    "CustomerProfileHistory", "ProfileHistoryResponse", "CustomerProfileHistoryResponse",
 ]

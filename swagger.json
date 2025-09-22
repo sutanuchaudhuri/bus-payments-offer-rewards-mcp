@@ -1,0 +1,4087 @@
+{
+  "components": {
+    "schemas": {
+      "BookingStatus": {
+        "enum": [
+          "CONFIRMED",
+          "CANCELLED",
+          "COMPLETED",
+          "REFUNDED"
+        ],
+        "type": "string"
+      },
+      "CreditCardProduct": {
+        "enum": [
+          "BASIC",
+          "SILVER",
+          "GOLD",
+          "PLATINUM"
+        ],
+        "type": "string"
+      },
+      "MerchantCategory": {
+        "enum": [
+          "RESTAURANT",
+          "RETAIL_STORE",
+          "GAS_STATION",
+          "AIRLINE",
+          "HOTEL",
+          "E_COMMERCE",
+          "GROCERY_STORE",
+          "PHARMACY",
+          "ENTERTAINMENT_VENUE",
+          "HEALTHCARE_PROVIDER",
+          "TELECOM_PROVIDER",
+          "UTILITY_COMPANY",
+          "INSURANCE_COMPANY",
+          "EDUCATIONAL_INSTITUTION",
+          "AUTOMOTIVE_SERVICE",
+          "HOME_IMPROVEMENT",
+          "FASHION_RETAILER",
+          "ELECTRONICS_STORE",
+          "SUBSCRIPTION_SERVICE",
+          "FINANCIAL_SERVICE",
+          "FITNESS_CENTER"
+        ],
+        "type": "string"
+      },
+      "OfferCategory": {
+        "enum": [
+          "TRAVEL",
+          "MERCHANT",
+          "CASHBACK",
+          "DINING",
+          "FUEL",
+          "SHOPPING"
+        ],
+        "type": "string"
+      },
+      "PaymentStatus": {
+        "enum": [
+          "PENDING",
+          "COMPLETED",
+          "FAILED",
+          "REFUNDED"
+        ],
+        "type": "string"
+      },
+      "RefundStatus": {
+        "enum": [
+          "REQUESTED",
+          "APPROVED",
+          "DENIED",
+          "PROCESSED",
+          "COMPLETED",
+          "CANCELLED"
+        ],
+        "type": "string"
+      },
+      "RefundType": {
+        "enum": [
+          "booking_cancellation",
+          "dispute_resolution",
+          "goodwill"
+        ],
+        "type": "string"
+      },
+      "RewardStatus": {
+        "enum": [
+          "EARNED",
+          "REDEEMED",
+          "EXPIRED"
+        ],
+        "type": "string"
+      }
+    }
+  },
+  "info": {
+    "description": "Comprehensive API for bus payment system with offers, rewards, bookings, and refunds",
+    "title": "Bus Payments & Rewards API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "docs": {
+                      "type": "string"
+                    },
+                    "health": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "API information"
+          }
+        },
+        "summary": "API information",
+        "tags": [
+          "General"
+        ]
+      }
+    },
+    "/api/bookings/{booking_id}/modify": {
+      "put": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "additional_services": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "modification_reason": {
+                    "type": "string"
+                  },
+                  "new_booking_date": {
+                    "format": "date-time",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Booking modified successfully"
+          },
+          "400": {
+            "description": "Invalid modification request"
+          },
+          "404": {
+            "description": "Booking not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Modify booking",
+        "tags": [
+          "Bookings"
+        ]
+      }
+    },
+    "/api/bookings/{booking_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking status details"
+          },
+          "404": {
+            "description": "Booking not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Get booking status",
+        "tags": [
+          "Bookings"
+        ]
+      }
+    },
+    "/api/customers": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "default": 10,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "current_page": {
+                      "type": "integer"
+                    },
+                    "customers": {
+                      "items": {
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "pages": {
+                      "type": "integer"
+                    },
+                    "per_page": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "List of customers"
+          }
+        },
+        "summary": "List all customers",
+        "tags": [
+          "Customers"
+        ]
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "address": {
+                    "type": "string"
+                  },
+                  "date_of_birth": {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  "email": {
+                    "format": "email",
+                    "type": "string"
+                  },
+                  "first_name": {
+                    "type": "string"
+                  },
+                  "last_name": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "first_name",
+                  "last_name",
+                  "email"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Customer created successfully"
+          },
+          "400": {
+            "description": "Invalid data"
+          },
+          "409": {
+            "description": "Email already exists"
+          }
+        },
+        "summary": "Create new customer",
+        "tags": [
+          "Customers"
+        ]
+      }
+    },
+    "/api/customers/{customer_id}": {
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer deleted successfully"
+          },
+          "404": {
+            "description": "Customer not found"
+          }
+        },
+        "summary": "Delete customer",
+        "tags": [
+          "Customers"
+        ]
+      },
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer details"
+          },
+          "404": {
+            "description": "Customer not found"
+          }
+        },
+        "summary": "Get customer details",
+        "tags": [
+          "Customers"
+        ]
+      },
+      "put": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "address": {
+                    "type": "string"
+                  },
+                  "date_of_birth": {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  "email": {
+                    "format": "email",
+                    "type": "string"
+                  },
+                  "first_name": {
+                    "type": "string"
+                  },
+                  "last_name": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Customer updated successfully"
+          },
+          "400": {
+            "description": "Invalid data"
+          },
+          "404": {
+            "description": "Customer not found"
+          }
+        },
+        "summary": "Update customer",
+        "tags": [
+          "Customers"
+        ]
+      }
+    },
+    "/api/customers/{customer_id}/credit-cards": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of customer credit cards"
+          },
+          "404": {
+            "description": "Customer not found"
+          }
+        },
+        "summary": "Get customer credit cards",
+        "tags": [
+          "Credit Cards"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "card_holder_name": {
+                    "type": "string"
+                  },
+                  "card_number": {
+                    "type": "string"
+                  },
+                  "credit_limit": {
+                    "format": "float",
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "expiry_month": {
+                    "maximum": 12,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "expiry_year": {
+                    "type": "integer"
+                  },
+                  "is_active": {
+                    "default": true,
+                    "type": "boolean"
+                  },
+                  "product_type": {
+                    "$ref": "#/components/schemas/CreditCardProduct"
+                  }
+                },
+                "required": [
+                  "card_number",
+                  "card_holder_name",
+                  "expiry_month",
+                  "expiry_year",
+                  "product_type",
+                  "credit_limit"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Credit card added successfully"
+          },
+          "400": {
+            "description": "Invalid data"
+          },
+          "409": {
+            "description": "Card number already exists"
+          }
+        },
+        "summary": "Add credit card to customer",
+        "tags": [
+          "Credit Cards"
+        ]
+      }
+    },
+    "/api/customers/{customer_id}/credit-cards/{card_id}": {
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "card_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Credit card deleted successfully"
+          },
+          "404": {
+            "description": "Credit card not found"
+          }
+        },
+        "summary": "Delete credit card",
+        "tags": [
+          "Credit Cards"
+        ]
+      },
+      "put": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "card_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "available_credit": {
+                    "type": "number"
+                  },
+                  "card_holder_name": {
+                    "type": "string"
+                  },
+                  "credit_limit": {
+                    "type": "number"
+                  },
+                  "expiry_month": {
+                    "type": "integer"
+                  },
+                  "expiry_year": {
+                    "type": "integer"
+                  },
+                  "is_active": {
+                    "type": "boolean"
+                  },
+                  "product_type": {
+                    "$ref": "#/components/schemas/CreditCardProduct"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Credit card updated successfully"
+          },
+          "400": {
+            "description": "Invalid data"
+          },
+          "404": {
+            "description": "Credit card not found"
+          }
+        },
+        "summary": "Update credit card",
+        "tags": [
+          "Credit Cards"
+        ]
+      }
+    },
+    "/api/health": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "timestamp": {
+                      "format": "date-time",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Service is healthy"
+          }
+        },
+        "summary": "Health check endpoint",
+        "tags": [
+          "General"
+        ]
+      }
+    },
+    "/api/merchants": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "default": 10,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "$ref": "#/components/schemas/MerchantCategory"
+            }
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "is_active",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of merchants"
+          },
+          "400": {
+            "description": "Invalid category"
+          }
+        },
+        "summary": "List all merchants",
+        "tags": [
+          "Merchants"
+        ]
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "address": {
+                    "type": "string"
+                  },
+                  "category": {
+                    "$ref": "#/components/schemas/MerchantCategory"
+                  },
+                  "contact_email": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "is_active": {
+                    "default": true,
+                    "type": "boolean"
+                  },
+                  "merchant_id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "website": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "merchant_id",
+                  "name",
+                  "category"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Merchant created successfully"
+          },
+          "400": {
+            "description": "Invalid data"
+          },
+          "409": {
+            "description": "Merchant ID already exists"
+          }
+        },
+        "summary": "Create new merchant",
+        "tags": [
+          "Merchants"
+        ]
+      }
+    },
+    "/api/merchants/categories": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "categories": {
+                      "items": {
+                        "properties": {
+                          "description": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "$ref": "#/components/schemas/MerchantCategory"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "List of merchant categories"
+          }
+        },
+        "summary": "Get all merchant categories",
+        "tags": [
+          "Merchants"
+        ]
+      }
+    },
+    "/api/merchants/{merchant_id}": {
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "merchant_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Merchant deleted successfully"
+          },
+          "400": {
+            "description": "Cannot delete merchant with active offers or transactions"
+          },
+          "404": {
+            "description": "Merchant not found"
+          }
+        },
+        "summary": "Delete merchant",
+        "tags": [
+          "Merchants"
+        ]
+      },
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "merchant_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Merchant details"
+          },
+          "404": {
+            "description": "Merchant not found"
+          }
+        },
+        "summary": "Get merchant details",
+        "tags": [
+          "Merchants"
+        ]
+      },
+      "put": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "merchant_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "address": {
+                    "type": "string"
+                  },
+                  "category": {
+                    "$ref": "#/components/schemas/MerchantCategory"
+                  },
+                  "contact_email": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "is_active": {
+                    "type": "boolean"
+                  },
+                  "merchant_id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "website": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Merchant updated successfully"
+          },
+          "400": {
+            "description": "Invalid data"
+          },
+          "404": {
+            "description": "Merchant not found"
+          }
+        },
+        "summary": "Update merchant",
+        "tags": [
+          "Merchants"
+        ]
+      }
+    },
+    "/api/merchants/{merchant_id}/analytics": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "merchant_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "start_date",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end_date",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Merchant analytics data"
+          },
+          "404": {
+            "description": "Merchant not found"
+          }
+        },
+        "summary": "Get merchant analytics",
+        "tags": [
+          "Merchants"
+        ]
+      }
+    },
+    "/api/merchants/{merchant_id}/history": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "merchant_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "start_date",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end_date",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offer_id",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Merchant offer usage history"
+          },
+          "404": {
+            "description": "Merchant not found"
+          }
+        },
+        "summary": "Get merchant offer history",
+        "tags": [
+          "Merchants"
+        ]
+      }
+    },
+    "/api/merchants/{merchant_id}/offers": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "merchant_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "is_active",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "$ref": "#/components/schemas/OfferCategory"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of merchant offers"
+          },
+          "404": {
+            "description": "Merchant not found"
+          }
+        },
+        "summary": "Get merchant offers",
+        "tags": [
+          "Merchants"
+        ]
+      }
+    },
+    "/api/offers": {
+      "get": {
+        "description": "Get all offers with optional filtering parameters. All query parameters are optional.",
+        "parameters": [
+          {
+            "description": "Page number for pagination",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Number of offers per page",
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Filter offers by category",
+            "in": "query",
+            "name": "category",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/OfferCategory"
+            }
+          },
+          {
+            "description": "Filter offers by merchant ID",
+            "in": "query",
+            "name": "merchant_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Filter offers by active status",
+            "in": "query",
+            "name": "is_active",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Include customer-specific offer data (activation status, usage count)",
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "current_page": {
+                      "description": "Current page number",
+                      "type": "integer"
+                    },
+                    "offers": {
+                      "items": {
+                        "properties": {
+                          "activation_date": {
+                            "description": "Only present when customer_id is provided and offer is activated",
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "category": {
+                            "$ref": "#/components/schemas/OfferCategory"
+                          },
+                          "created_at": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "customer_activated": {
+                            "description": "Only present when customer_id is provided",
+                            "type": "boolean"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "discount_percentage": {
+                            "type": "number"
+                          },
+                          "expiry_date": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "is_active": {
+                            "type": "boolean"
+                          },
+                          "max_discount_amount": {
+                            "type": "number"
+                          },
+                          "max_usage_per_customer": {
+                            "type": "integer"
+                          },
+                          "merchant_category": {
+                            "type": "string"
+                          },
+                          "merchant_id": {
+                            "type": "integer"
+                          },
+                          "merchant_name": {
+                            "type": "string"
+                          },
+                          "min_transaction_amount": {
+                            "type": "number"
+                          },
+                          "reward_points": {
+                            "type": "integer"
+                          },
+                          "start_date": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "terms_and_conditions": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "used_count": {
+                            "description": "Only present when customer_id is provided and offer is activated",
+                            "type": "integer"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "pages": {
+                      "description": "Total number of pages",
+                      "type": "integer"
+                    },
+                    "per_page": {
+                      "description": "Number of offers per page",
+                      "type": "integer"
+                    },
+                    "total": {
+                      "description": "Total number of offers",
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "List of offers with pagination information"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Invalid category or other validation error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Internal server error"
+          }
+        },
+        "summary": "List offers",
+        "tags": [
+          "Offers"
+        ]
+      },
+      "post": {
+        "description": "Create a new offer with the specified details",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "category": {
+                    "$ref": "#/components/schemas/OfferCategory",
+                    "description": "Offer category"
+                  },
+                  "description": {
+                    "description": "Offer description",
+                    "type": "string"
+                  },
+                  "discount_percentage": {
+                    "description": "Discount percentage (0-100)",
+                    "format": "float",
+                    "maximum": 100,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "expiry_date": {
+                    "description": "Offer expiry date",
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "is_active": {
+                    "default": true,
+                    "description": "Whether the offer is active",
+                    "type": "boolean"
+                  },
+                  "max_discount_amount": {
+                    "description": "Maximum discount amount",
+                    "format": "float",
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "max_usage_per_customer": {
+                    "default": 1,
+                    "description": "Maximum times a customer can use this offer",
+                    "type": "integer"
+                  },
+                  "merchant_id": {
+                    "description": "Associated merchant ID",
+                    "type": "integer"
+                  },
+                  "merchant_name": {
+                    "description": "Merchant name (deprecated, use merchant_id)",
+                    "type": "string"
+                  },
+                  "min_transaction_amount": {
+                    "description": "Minimum transaction amount to qualify",
+                    "format": "float",
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "reward_points": {
+                    "default": 0,
+                    "description": "Reward points for this offer",
+                    "type": "integer"
+                  },
+                  "start_date": {
+                    "description": "Offer start date",
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "terms_and_conditions": {
+                    "description": "Terms and conditions",
+                    "type": "string"
+                  },
+                  "title": {
+                    "description": "Offer title",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "title",
+                  "category",
+                  "start_date",
+                  "expiry_date"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "category": {
+                      "$ref": "#/components/schemas/OfferCategory"
+                    },
+                    "created_at": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "discount_percentage": {
+                      "type": "number"
+                    },
+                    "expiry_date": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "integer"
+                    },
+                    "is_active": {
+                      "type": "boolean"
+                    },
+                    "max_discount_amount": {
+                      "type": "number"
+                    },
+                    "max_usage_per_customer": {
+                      "type": "integer"
+                    },
+                    "merchant_id": {
+                      "type": "integer"
+                    },
+                    "merchant_name": {
+                      "type": "string"
+                    },
+                    "min_transaction_amount": {
+                      "type": "number"
+                    },
+                    "reward_points": {
+                      "type": "integer"
+                    },
+                    "start_date": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "terms_and_conditions": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer created successfully"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Invalid data or validation error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Create new offer",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/offers/categories": {
+      "get": {
+        "description": "Get all available offer categories with descriptions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "categories": {
+                      "items": {
+                        "properties": {
+                          "description": {
+                            "description": "Category description",
+                            "type": "string"
+                          },
+                          "name": {
+                            "description": "Category name",
+                            "type": "string"
+                          },
+                          "value": {
+                            "$ref": "#/components/schemas/OfferCategory",
+                            "description": "Category value"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "List of offer categories"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Get all offer categories",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/offers/{offer_id}": {
+      "delete": {
+        "description": "Delete an offer (only allowed if no active customer activations exist)",
+        "parameters": [
+          {
+            "description": "Offer ID",
+            "in": "path",
+            "name": "offer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer deleted successfully"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Cannot delete offer with active customer activations"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Delete offer",
+        "tags": [
+          "Offers"
+        ]
+      },
+      "get": {
+        "description": "Get details of a specific offer by ID including activation statistics",
+        "parameters": [
+          {
+            "description": "Offer ID",
+            "in": "path",
+            "name": "offer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "category": {
+                      "$ref": "#/components/schemas/OfferCategory"
+                    },
+                    "created_at": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "discount_percentage": {
+                      "type": "number"
+                    },
+                    "expiry_date": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "integer"
+                    },
+                    "is_active": {
+                      "type": "boolean"
+                    },
+                    "max_discount_amount": {
+                      "type": "number"
+                    },
+                    "max_usage_per_customer": {
+                      "type": "integer"
+                    },
+                    "merchant_category": {
+                      "type": "string"
+                    },
+                    "merchant_id": {
+                      "type": "integer"
+                    },
+                    "merchant_name": {
+                      "type": "string"
+                    },
+                    "min_transaction_amount": {
+                      "type": "number"
+                    },
+                    "reward_points": {
+                      "type": "integer"
+                    },
+                    "start_date": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "statistics": {
+                      "properties": {
+                        "active_activations": {
+                          "description": "Number of currently active activations",
+                          "type": "integer"
+                        },
+                        "total_activations": {
+                          "description": "Total number of customer activations",
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "terms_and_conditions": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer details with statistics"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Get specific offer",
+        "tags": [
+          "Offers"
+        ]
+      },
+      "put": {
+        "description": "Update an existing offer with new details",
+        "parameters": [
+          {
+            "description": "Offer ID",
+            "in": "path",
+            "name": "offer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "All fields are optional for update",
+                "properties": {
+                  "category": {
+                    "$ref": "#/components/schemas/OfferCategory",
+                    "description": "Offer category"
+                  },
+                  "description": {
+                    "description": "Offer description",
+                    "type": "string"
+                  },
+                  "discount_percentage": {
+                    "description": "Discount percentage (0-100)",
+                    "format": "float",
+                    "maximum": 100,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "expiry_date": {
+                    "description": "Offer expiry date",
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "is_active": {
+                    "description": "Whether the offer is active",
+                    "type": "boolean"
+                  },
+                  "max_discount_amount": {
+                    "description": "Maximum discount amount",
+                    "format": "float",
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "max_usage_per_customer": {
+                    "description": "Maximum times a customer can use this offer",
+                    "type": "integer"
+                  },
+                  "merchant_id": {
+                    "description": "Associated merchant ID",
+                    "type": "integer"
+                  },
+                  "merchant_name": {
+                    "description": "Merchant name",
+                    "type": "string"
+                  },
+                  "min_transaction_amount": {
+                    "description": "Minimum transaction amount to qualify",
+                    "format": "float",
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "reward_points": {
+                    "description": "Reward points for this offer",
+                    "type": "integer"
+                  },
+                  "start_date": {
+                    "description": "Offer start date",
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "terms_and_conditions": {
+                    "description": "Terms and conditions",
+                    "type": "string"
+                  },
+                  "title": {
+                    "description": "Offer title",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "category": {
+                      "$ref": "#/components/schemas/OfferCategory"
+                    },
+                    "created_at": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "discount_percentage": {
+                      "type": "number"
+                    },
+                    "expiry_date": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "integer"
+                    },
+                    "is_active": {
+                      "type": "boolean"
+                    },
+                    "max_discount_amount": {
+                      "type": "number"
+                    },
+                    "max_usage_per_customer": {
+                      "type": "integer"
+                    },
+                    "merchant_id": {
+                      "type": "integer"
+                    },
+                    "merchant_name": {
+                      "type": "string"
+                    },
+                    "min_transaction_amount": {
+                      "type": "number"
+                    },
+                    "reward_points": {
+                      "type": "integer"
+                    },
+                    "start_date": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "terms_and_conditions": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer updated successfully"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Invalid data or validation error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Update offer",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/offers/{offer_id}/activate": {
+      "post": {
+        "description": "Activate an offer for a specific customer",
+        "parameters": [
+          {
+            "description": "Offer ID",
+            "in": "path",
+            "name": "offer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "customer_id": {
+                    "description": "Customer ID to activate the offer for",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "customer_id"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "activation_date": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "customer_id": {
+                      "type": "integer"
+                    },
+                    "id": {
+                      "type": "integer"
+                    },
+                    "is_active": {
+                      "type": "boolean"
+                    },
+                    "offer_id": {
+                      "type": "integer"
+                    },
+                    "total_savings": {
+                      "type": "number"
+                    },
+                    "usage_count": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer activated successfully for customer"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer not active, expired, or not started"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer or customer not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer already activated for this customer"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Activate offer for customer",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/offers/{offer_id}/deactivate": {
+      "post": {
+        "description": "Deactivate an offer (sets is_active to false)",
+        "parameters": [
+          {
+            "description": "Offer ID",
+            "in": "path",
+            "name": "offer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "offer": {
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "is_active": {
+                          "type": "boolean"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer deactivated successfully"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer is already inactive"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Deactivate offer",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/offers/{offer_id}/expire": {
+      "post": {
+        "description": "Manually expire an offer by setting its expiry date to current time and deactivating it",
+        "parameters": [
+          {
+            "description": "Offer ID",
+            "in": "path",
+            "name": "offer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "offer": {
+                      "properties": {
+                        "expiry_date": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "integer"
+                        },
+                        "is_active": {
+                          "type": "boolean"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer expired successfully"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer is already expired"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Expire offer",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/offers/{offer_id}/reactivate": {
+      "post": {
+        "description": "Reactivate a deactivated offer (sets is_active to true, only if not expired)",
+        "parameters": [
+          {
+            "description": "Offer ID",
+            "in": "path",
+            "name": "offer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "offer": {
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "is_active": {
+                          "type": "boolean"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer reactivated successfully"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer is already active or expired"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Offer not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Reactivate offer",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/payments": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "default": 10,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customer_id",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "$ref": "#/components/schemas/PaymentStatus"
+            }
+          },
+          {
+            "in": "query",
+            "name": "merchant_name",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of payments"
+          }
+        },
+        "summary": "List payments",
+        "tags": [
+          "Payments"
+        ]
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "amount": {
+                    "format": "float",
+                    "minimum": 0.01,
+                    "type": "number"
+                  },
+                  "category": {
+                    "type": "string"
+                  },
+                  "credit_card_id": {
+                    "type": "integer"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "merchant_name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "credit_card_id",
+                  "amount",
+                  "merchant_name"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Payment processed successfully"
+          },
+          "400": {
+            "description": "Invalid data or insufficient credit"
+          },
+          "404": {
+            "description": "Credit card not found"
+          }
+        },
+        "summary": "Make a payment",
+        "tags": [
+          "Payments"
+        ]
+      }
+    },
+    "/api/payments/analytics/spending": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "customer_id",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "start_date",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end_date",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "group_by",
+            "schema": {
+              "default": "month",
+              "enum": [
+                "day",
+                "week",
+                "month"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Spending analytics data"
+          }
+        },
+        "summary": "Get spending analytics",
+        "tags": [
+          "Payments"
+        ]
+      }
+    },
+    "/api/payments/customer/{customer_id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "start_date",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end_date",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer payment history"
+          }
+        },
+        "summary": "Get customer payments",
+        "tags": [
+          "Payments"
+        ]
+      }
+    },
+    "/api/payments/{payment_id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "payment_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment details"
+          },
+          "404": {
+            "description": "Payment not found"
+          }
+        },
+        "summary": "Get payment details",
+        "tags": [
+          "Payments"
+        ]
+      }
+    },
+    "/api/payments/{payment_id}/refund": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "payment_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "amount": {
+                    "format": "float",
+                    "type": "number"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "Payment refunded successfully"
+          },
+          "400": {
+            "description": "Cannot refund payment"
+          },
+          "404": {
+            "description": "Payment not found"
+          }
+        },
+        "summary": "Refund a payment",
+        "tags": [
+          "Payments"
+        ]
+      }
+    },
+    "/api/refunds": {
+      "get": {
+        "description": "Get all refund requests with optional filtering",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "default": 10,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "$ref": "#/components/schemas/RefundStatus"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customer_id",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "refund_type",
+            "schema": {
+              "enum": [
+                "booking_cancellation",
+                "dispute_resolution",
+                "goodwill"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of refunds with pagination"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "List refunds",
+        "tags": [
+          "Refunds"
+        ]
+      }
+    },
+    "/api/refunds/points/cancel": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "customer_id": {
+                    "type": "integer"
+                  },
+                  "points_to_refund": {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "customer_id",
+                  "points_to_refund",
+                  "reason"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Points redemption cancelled and refunded successfully"
+          },
+          "400": {
+            "description": "Invalid data"
+          },
+          "404": {
+            "description": "Customer not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Cancel points redemption",
+        "tags": [
+          "Refunds"
+        ]
+      }
+    },
+    "/api/refunds/request": {
+      "post": {
+        "description": "Submit a refund request for booking cancellation, dispute resolution, or goodwill",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "booking_id": {
+                    "type": "integer"
+                  },
+                  "payment_id": {
+                    "type": "integer"
+                  },
+                  "reason": {
+                    "type": "string"
+                  },
+                  "refund_amount": {
+                    "format": "float",
+                    "minimum": 0.01,
+                    "type": "number"
+                  },
+                  "refund_type": {
+                    "enum": [
+                      "booking_cancellation",
+                      "dispute_resolution",
+                      "goodwill"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "refund_type",
+                  "refund_amount",
+                  "reason"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Refund request created successfully"
+          },
+          "400": {
+            "description": "Invalid data"
+          },
+          "404": {
+            "description": "Related booking or payment not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Request a refund",
+        "tags": [
+          "Refunds"
+        ]
+      }
+    },
+    "/api/refunds/{refund_id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "refund_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Refund details"
+          },
+          "404": {
+            "description": "Refund not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Get refund details",
+        "tags": [
+          "Refunds"
+        ]
+      }
+    },
+    "/api/refunds/{refund_id}/approve": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "refund_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Refund approved successfully"
+          },
+          "400": {
+            "description": "Refund cannot be approved"
+          },
+          "404": {
+            "description": "Refund not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Approve refund",
+        "tags": [
+          "Refunds"
+        ]
+      }
+    },
+    "/api/refunds/{refund_id}/deny": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "refund_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "denial_reason": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "Refund denied successfully"
+          },
+          "400": {
+            "description": "Refund cannot be denied"
+          },
+          "404": {
+            "description": "Refund not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Deny refund",
+        "tags": [
+          "Refunds"
+        ]
+      }
+    },
+    "/api/rewards": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "customer_id": {
+                    "type": "integer"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "dollar_value": {
+                    "type": "number"
+                  },
+                  "expiry_date": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "offer_id": {
+                    "type": "integer"
+                  },
+                  "points_earned": {
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "customer_id",
+                  "points_earned",
+                  "description"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Reward created successfully"
+          },
+          "400": {
+            "description": "Invalid data"
+          },
+          "404": {
+            "description": "Customer not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Create manual reward",
+        "tags": [
+          "Rewards"
+        ]
+      }
+    },
+    "/api/rewards/customer/{customer_id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "default": 10,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "$ref": "#/components/schemas/RewardStatus"
+            }
+          },
+          {
+            "in": "query",
+            "name": "start_date",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end_date",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of customer rewards"
+          },
+          "400": {
+            "description": "Invalid parameters"
+          },
+          "404": {
+            "description": "Customer not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Get customer rewards",
+        "tags": [
+          "Rewards"
+        ]
+      }
+    },
+    "/api/rewards/customer/{customer_id}/balance": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer balance information"
+          },
+          "404": {
+            "description": "Customer not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Get customer balance",
+        "tags": [
+          "Rewards"
+        ]
+      }
+    },
+    "/api/rewards/customer/{customer_id}/history": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "default": 10,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "start_date",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end_date",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Redemption history"
+          },
+          "400": {
+            "description": "Invalid parameters"
+          },
+          "404": {
+            "description": "Customer not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Get redemption history",
+        "tags": [
+          "Rewards"
+        ]
+      }
+    },
+    "/api/rewards/customer/{customer_id}/redeem": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  },
+                  "points": {
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "points"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Points redeemed successfully"
+          },
+          "400": {
+            "description": "Invalid redemption request or insufficient points"
+          },
+          "404": {
+            "description": "Customer not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Redeem customer points",
+        "tags": [
+          "Rewards"
+        ]
+      }
+    },
+    "/api/rewards/expire-check": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Rewards expiry check completed"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Expire rewards",
+        "tags": [
+          "Rewards"
+        ]
+      }
+    },
+    "/api/rewards/{reward_id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reward_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reward details"
+          },
+          "404": {
+            "description": "Reward not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Get specific reward",
+        "tags": [
+          "Rewards"
+        ]
+      }
+    },
+    "/api/rewards/{reward_id}/redeem": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reward_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "points": {
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "Reward points redeemed successfully"
+          },
+          "400": {
+            "description": "Invalid redemption request"
+          },
+          "404": {
+            "description": "Reward not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Redeem specific reward",
+        "tags": [
+          "Rewards"
+        ]
+      }
+    },
+    "/api/tokens/card/{card_id}/tokens": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "card_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "is_active",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of card tokens"
+          },
+          "404": {
+            "description": "Credit card not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Get card tokens",
+        "tags": [
+          "Card Tokens"
+        ]
+      }
+    },
+    "/api/tokens/create": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "card_id": {
+                    "type": "integer"
+                  },
+                  "expires_in_hours": {
+                    "default": 24,
+                    "maximum": 8760,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "token_type": {
+                    "default": "SINGLE_USE",
+                    "enum": [
+                      "SINGLE_USE",
+                      "MULTI_USE",
+                      "RECURRING"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "card_id"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Token created successfully"
+          },
+          "400": {
+            "description": "Invalid data"
+          },
+          "404": {
+            "description": "Credit card not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Create card token",
+        "tags": [
+          "Card Tokens"
+        ]
+      }
+    },
+    "/api/tokens/customer/{customer_id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "is_active",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of customer tokens"
+          },
+          "404": {
+            "description": "Customer not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Get customer tokens",
+        "tags": [
+          "Card Tokens"
+        ]
+      }
+    },
+    "/api/tokens/{token_id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token details"
+          },
+          "404": {
+            "description": "Token not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Get token details",
+        "tags": [
+          "Card Tokens"
+        ]
+      }
+    },
+    "/api/tokens/{token_id}/deactivate": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token deactivated successfully"
+          },
+          "404": {
+            "description": "Token not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Deactivate token",
+        "tags": [
+          "Card Tokens"
+        ]
+      }
+    },
+    "/api/tokens/{token_id}/validate": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token is valid"
+          },
+          "400": {
+            "description": "Token is invalid or expired"
+          },
+          "404": {
+            "description": "Token not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Validate token",
+        "tags": [
+          "Card Tokens"
+        ]
+      }
+    },
+    "/offers/hotel/book-hotel": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "check_in": {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  "check_out": {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  "customer_id": {
+                    "type": "integer"
+                  },
+                  "guests": {
+                    "items": {
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "hotel_id": {
+                    "type": "string"
+                  },
+                  "rooms": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "hotel_id",
+                  "customer_id",
+                  "check_in",
+                  "check_out",
+                  "guests"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Hotel booked successfully"
+          }
+        },
+        "summary": "Book hotel",
+        "tags": [
+          "Hotel Integration"
+        ]
+      }
+    },
+    "/offers/hotel/booking/{booking_reference}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_reference",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hotel booking details"
+          }
+        },
+        "summary": "Get hotel booking details",
+        "tags": [
+          "Hotel Integration"
+        ]
+      }
+    },
+    "/offers/hotel/cities": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "List of cities"
+          }
+        },
+        "summary": "Get available cities",
+        "tags": [
+          "Hotel Integration"
+        ]
+      }
+    },
+    "/offers/hotel/search-hotels": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "check_in": {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  "check_out": {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  "city": {
+                    "type": "string"
+                  },
+                  "guests": {
+                    "default": 1,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "rooms": {
+                    "default": 1,
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "city",
+                  "check_in",
+                  "check_out"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Available hotels"
+          }
+        },
+        "summary": "Search hotels",
+        "tags": [
+          "Hotel Integration"
+        ]
+      }
+    },
+    "/offers/search/travel-package": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "departure_date": {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  "destination": {
+                    "type": "string"
+                  },
+                  "origin": {
+                    "type": "string"
+                  },
+                  "passengers": {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "return_date": {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  "rooms": {
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "origin",
+                  "destination",
+                  "departure_date",
+                  "return_date"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Available travel packages"
+          }
+        },
+        "summary": "Search travel packages",
+        "tags": [
+          "Travel Integration"
+        ]
+      }
+    },
+    "/offers/shopping/add-to-cart": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "customer_id": {
+                    "type": "integer"
+                  },
+                  "product_id": {
+                    "type": "string"
+                  },
+                  "quantity": {
+                    "default": 1,
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "customer_id",
+                  "product_id"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Product added to cart"
+          }
+        },
+        "summary": "Add product to cart",
+        "tags": [
+          "Shopping Integration"
+        ]
+      }
+    },
+    "/offers/shopping/brands": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "List of brands"
+          }
+        },
+        "summary": "Get available brands",
+        "tags": [
+          "Shopping Integration"
+        ]
+      }
+    },
+    "/offers/shopping/categories": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "List of categories"
+          }
+        },
+        "summary": "Get shopping categories",
+        "tags": [
+          "Shopping Integration"
+        ]
+      }
+    },
+    "/offers/shopping/create-order": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "customer_id": {
+                    "type": "integer"
+                  },
+                  "payment_method": {
+                    "enum": [
+                      "credit_card",
+                      "points"
+                    ],
+                    "type": "string"
+                  },
+                  "shipping_address": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "customer_id",
+                  "shipping_address",
+                  "payment_method"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Order created successfully"
+          }
+        },
+        "summary": "Create shopping order",
+        "tags": [
+          "Shopping Integration"
+        ]
+      }
+    },
+    "/offers/shopping/order/{order_id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order details"
+          }
+        },
+        "summary": "Get order details",
+        "tags": [
+          "Shopping Integration"
+        ]
+      }
+    },
+    "/offers/shopping/product/{product_id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "product_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product details"
+          }
+        },
+        "summary": "Get product details",
+        "tags": [
+          "Shopping Integration"
+        ]
+      }
+    },
+    "/offers/shopping/search": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "brand": {
+                    "type": "string"
+                  },
+                  "category": {
+                    "type": "string"
+                  },
+                  "max_price": {
+                    "type": "number"
+                  },
+                  "min_price": {
+                    "type": "number"
+                  },
+                  "page": {
+                    "default": 1,
+                    "type": "integer"
+                  },
+                  "per_page": {
+                    "default": 20,
+                    "type": "integer"
+                  },
+                  "query": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Search results"
+          }
+        },
+        "summary": "Search products",
+        "tags": [
+          "Shopping Integration"
+        ]
+      }
+    },
+    "/offers/travel/airports": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "List of airports"
+          }
+        },
+        "summary": "Get available airports",
+        "tags": [
+          "Travel Integration"
+        ]
+      }
+    },
+    "/offers/travel/book-flight": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "customer_id": {
+                    "type": "integer"
+                  },
+                  "flight_id": {
+                    "type": "string"
+                  },
+                  "passengers": {
+                    "items": {
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "flight_id",
+                  "customer_id",
+                  "passengers"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Flight booked successfully"
+          }
+        },
+        "summary": "Book flight",
+        "tags": [
+          "Travel Integration"
+        ]
+      }
+    },
+    "/offers/travel/booking/{booking_reference}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_reference",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking details"
+          }
+        },
+        "summary": "Get travel booking details",
+        "tags": [
+          "Travel Integration"
+        ]
+      }
+    },
+    "/offers/travel/search-flights": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "departure_date": {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  "destination": {
+                    "type": "string"
+                  },
+                  "origin": {
+                    "type": "string"
+                  },
+                  "passengers": {
+                    "default": 1,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "return_date": {
+                    "format": "date",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "origin",
+                  "destination",
+                  "departure_date"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Available flights"
+          }
+        },
+        "summary": "Search flights",
+        "tags": [
+          "Travel Integration"
+        ]
+      }
+    },
+    "/simulator/status": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Simulator status information"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "summary": "Get simulator status",
+        "tags": [
+          "Integration"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "description": "Local development server",
+      "url": "http://192.168.86.189:5001"
+    }
+  ]
+}

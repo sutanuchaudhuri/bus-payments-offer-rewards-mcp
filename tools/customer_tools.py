@@ -1,9 +1,8 @@
 from fastmcp import FastMCP
 from fastapi import Query, Path, Body
 from typing import Optional
-from datetime import datetime
 from models import (
-    Customer, CustomerCreate, CustomerUpdate, CustomerListResponse
+    Customer, CustomerCreate, CustomerUpdate, CustomerListResponse, api_client
 )
 
 def register_customer_tools(mcp: FastMCP):
@@ -11,81 +10,62 @@ def register_customer_tools(mcp: FastMCP):
 
     @mcp.tool(
         name="list_customers",
-        description="Retrieve a paginated list of all customers in the system with optional email filtering. Returns customer profiles including personal information, contact details, and account creation timestamps.",
-        tags={"customers", "user_management", "profiles"},
+        description="Retrieve a paginated list of all customers in the system with optional email filtering. Returns customer profiles including personal information, contact details, and account creation timestamps for customer management and analytics.",
+        tags={"customers", "user_management", "profiles", "search"},
         meta={"version": "1.0", "category": "customer_management"}
     )
     async def list_customers(
         page: int = Query(1, description="Page number for pagination"),
         per_page: int = Query(10, description="Number of customers per page"),
         email: Optional[str] = Query(None, description="Filter customers by email address")
-    ) -> CustomerListResponse:
+    ) -> dict:
         """List all customers with pagination and optional email filtering"""
-        # Stub implementation - replace with actual database logic
-        return CustomerListResponse(
-            customers=[],
-            total=0,
-            page=page,
-            per_page=per_page,
-            pages=0
-        )
+        params = {"page": page, "per_page": per_page}
+        if email:
+            params["email"] = email
+        return await api_client.get("/api/customers", params=params)
 
     @mcp.tool(
         name="create_customer",
-        description="Register a new customer account with personal information including name, email, phone, date of birth, and address. Creates a unique customer profile for credit card and payment management.",
-        tags={"customers", "registration", "account_creation"},
+        description="Register a new customer account with personal information including name, email, phone, date of birth, and address. Creates a unique customer profile for credit card and payment management with full data validation and duplicate email prevention.",
+        tags={"customers", "registration", "account_creation", "onboarding"},
         meta={"version": "1.0", "category": "customer_management"}
     )
-    async def create_customer(customer: CustomerCreate = Body(...)) -> Customer:
+    async def create_customer(customer: CustomerCreate = Body(..., description="Customer registration details including required name and email, plus optional contact and personal information")) -> dict:
         """Create a new customer account"""
-        # Stub implementation - replace with actual database logic
-        return Customer(
-            id=1,
-            **customer.dict(),
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
-        )
+        customer_data = customer.model_dump(exclude_unset=True)
+        return await api_client.post("/api/customers", data=customer_data)
 
     @mcp.tool(
         name="get_customer_details",
-        description="Retrieve detailed information about a specific customer including full profile, contact information, registration date, and account status. Used for customer service and account management.",
-        tags={"customers", "profile", "account_details"},
+        description="Retrieve detailed information about a specific customer including full profile, contact information, registration date, and account status. Used for customer service, account management, and support operations.",
+        tags={"customers", "details", "profile", "support"},
         meta={"version": "1.0", "category": "customer_management"}
     )
-    async def get_customer_details(customer_id: int = Path(..., description="Unique customer identifier")) -> Customer:
-        """Get detailed information about a specific customer"""
-        # Stub implementation - replace with actual database logic
-        return Customer(
-            id=customer_id,
-            first_name="John",
-            last_name="Doe",
-            email="john.doe@example.com",
-            phone="+1234567890",
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
-        )
+    async def get_customer_details(customer_id: int = Path(..., description="Customer ID to retrieve")) -> dict:
+        """Get detailed customer information"""
+        return await api_client.get(f"/api/customers/{customer_id}")
 
     @mcp.tool(
         name="update_customer",
-        description="Update existing customer information including personal details, contact information, and address. Supports partial updates and maintains data integrity for customer profiles.",
-        tags={"customers", "profile_update", "account_management"},
+        description="Update existing customer information including name, email, phone, address, and personal details. Supports partial updates and maintains data integrity with email uniqueness validation.",
+        tags={"customers", "update", "profile_management", "data_maintenance"},
         meta={"version": "1.0", "category": "customer_management"}
     )
     async def update_customer(
-        customer_id: int = Path(..., description="Unique customer identifier"),
-        customer: CustomerUpdate = Body(...)
+        customer_id: int = Path(..., description="Customer ID to update"),
+        customer: CustomerUpdate = Body(..., description="Updated customer information")
     ) -> dict:
         """Update customer information"""
-        # Stub implementation - replace with actual database logic
-        return {"message": "Customer updated successfully"}
+        customer_data = customer.model_dump(exclude_unset=True)
+        return await api_client.put(f"/api/customers/{customer_id}", data=customer_data)
 
     @mcp.tool(
         name="delete_customer",
-        description="Permanently remove a customer account and all associated data from the system. This action is irreversible and will also remove linked credit cards, payment history, and rewards.",
-        tags={"customers", "account_deletion", "data_management"},
+        description="Remove a customer account from the system. Permanently deletes customer profile and associated data. Use with caution as this action cannot be undone and may affect related transactions and credit cards.",
+        tags={"customers", "deletion", "account_removal", "data_cleanup"},
         meta={"version": "1.0", "category": "customer_management"}
     )
-    async def delete_customer(customer_id: int = Path(..., description="Unique customer identifier")) -> dict:
+    async def delete_customer(customer_id: int = Path(..., description="Customer ID to delete")) -> dict:
         """Delete a customer account"""
-        # Stub implementation - replace with actual database logic
-        return {"message": "Customer deleted successfully"}
+        return await api_client.delete(f"/api/customers/{customer_id}")

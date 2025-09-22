@@ -2,7 +2,7 @@ from fastmcp import FastMCP
 from fastapi import Query, Path
 from typing import Optional
 from models import (
-    ProfileHistoryResponse, CustomerProfileHistoryResponse
+    ProfileHistoryResponse, CustomerProfileHistoryResponse, api_client
 )
 
 def register_profile_history_tools(mcp: FastMCP):
@@ -15,14 +15,24 @@ def register_profile_history_tools(mcp: FastMCP):
         meta={"version": "1.0", "category": "analytics_reporting"}
     )
     async def list_profile_history(
+        page: int = Query(1, description="Page number for pagination"),
+        per_page: int = Query(10, description="Number of records per page"),
         customer_id: Optional[int] = Query(None, description="Filter history by specific customer ID"),
         merchant_id: Optional[int] = Query(None, description="Filter history by specific merchant ID"),
         start_date: Optional[str] = Query(None, description="Filter history from this date (YYYY-MM-DD format)"),
         end_date: Optional[str] = Query(None, description="Filter history until this date (YYYY-MM-DD format)")
-    ) -> ProfileHistoryResponse:
+    ) -> dict:
         """List profile history with filtering options"""
-        # Stub implementation - replace with actual database logic
-        return ProfileHistoryResponse(history=[])
+        params = {"page": page, "per_page": per_page}
+        if customer_id:
+            params["customer_id"] = customer_id
+        if merchant_id:
+            params["merchant_id"] = merchant_id
+        if start_date:
+            params["start_date"] = start_date
+        if end_date:
+            params["end_date"] = end_date
+        return await api_client.get("/api/profile-history", params=params)
 
     @mcp.tool(
         name="get_customer_profile_history",
@@ -32,7 +42,6 @@ def register_profile_history_tools(mcp: FastMCP):
     )
     async def get_customer_profile_history(
         customer_id: int = Path(..., description="Unique customer identifier to generate profile history for")
-    ) -> CustomerProfileHistoryResponse:
+    ) -> dict:
         """Get profile history for a specific customer"""
-        # Stub implementation - replace with actual database logic
-        return CustomerProfileHistoryResponse(history=[], total_saved=0.0)
+        return await api_client.get(f"/api/customers/{customer_id}/profile-history")

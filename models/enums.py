@@ -1,10 +1,16 @@
 from enum import Enum
 
-class PaymentStatus(str, Enum):
-    PENDING = "PENDING"
+class BookingStatus(str, Enum):
+    CONFIRMED = "CONFIRMED"
+    CANCELLED = "CANCELLED"
     COMPLETED = "COMPLETED"
-    FAILED = "FAILED"
     REFUNDED = "REFUNDED"
+
+class CreditCardProduct(str, Enum):
+    BASIC = "BASIC"
+    SILVER = "SILVER"
+    GOLD = "GOLD"
+    PLATINUM = "PLATINUM"
 
 class MerchantCategory(str, Enum):
     RESTAURANT = "RESTAURANT"
@@ -17,14 +23,54 @@ class MerchantCategory(str, Enum):
     PHARMACY = "PHARMACY"
     ENTERTAINMENT_VENUE = "ENTERTAINMENT_VENUE"
     HEALTHCARE_PROVIDER = "HEALTHCARE_PROVIDER"
+    TELECOM_PROVIDER = "TELECOM_PROVIDER"
+    UTILITY_COMPANY = "UTILITY_COMPANY"
+    INSURANCE_COMPANY = "INSURANCE_COMPANY"
+    EDUCATIONAL_INSTITUTION = "EDUCATIONAL_INSTITUTION"
+    AUTOMOTIVE_SERVICE = "AUTOMOTIVE_SERVICE"
+    HOME_IMPROVEMENT = "HOME_IMPROVEMENT"
+    FASHION_RETAILER = "FASHION_RETAILER"
+    ELECTRONICS_STORE = "ELECTRONICS_STORE"
+    SUBSCRIPTION_SERVICE = "SUBSCRIPTION_SERVICE"
+    FINANCIAL_SERVICE = "FINANCIAL_SERVICE"
+    FITNESS_CENTER = "FITNESS_CENTER"
 
-class ProductType(str, Enum):
-    PLATINUM = "PLATINUM"
-    GOLD = "GOLD"
-    SILVER = "SILVER"
-    BASIC = "BASIC"
+class OfferCategory(str, Enum):
+    TRAVEL = "TRAVEL"
+    MERCHANT = "MERCHANT"
+    CASHBACK = "CASHBACK"
+    DINING = "DINING"
+    FUEL = "FUEL"
+    SHOPPING = "SHOPPING"
+
+class PaymentStatus(str, Enum):
+    PENDING = "PENDING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    REFUNDED = "REFUNDED"
+
+class RefundStatus(str, Enum):
+    REQUESTED = "REQUESTED"
+    APPROVED = "APPROVED"
+    DENIED = "DENIED"
+    PROCESSED = "PROCESSED"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+
+class RefundType(str, Enum):
+    BOOKING_CANCELLATION = "booking_cancellation"
+    DISPUTE_RESOLUTION = "dispute_resolution"
+    GOODWILL = "goodwill"
 
 class RewardStatus(str, Enum):
     EARNED = "EARNED"
     REDEEMED = "REDEEMED"
     EXPIRED = "EXPIRED"
+
+class TokenType(str, Enum):
+    SINGLE_USE = "SINGLE_USE"
+    MULTI_USE = "MULTI_USE"
+    RECURRING = "RECURRING"
+
+# Alias for backward compatibility
+ProductType = CreditCardProduct
