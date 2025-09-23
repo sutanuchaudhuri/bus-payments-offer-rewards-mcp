@@ -18,22 +18,18 @@ def register_payment_tools(mcp: FastMCP):
     async def list_payments(
         page: int = Query(1, description="Page number for pagination"),
         per_page: int = Query(10, description="Number of payments per page"),
-        customer_id: Optional[int] = Query(None, description="Filter payments by specific customer ID"),
-        start_date: Optional[str] = Query(None, description="Filter payments from this date (YYYY-MM-DD format)"),
-        end_date: Optional[str] = Query(None, description="Filter payments until this date (YYYY-MM-DD format)"),
-        status: Optional[PaymentStatus] = Query(None, description="Filter by payment status (PENDING, COMPLETED, FAILED, REFUNDED)")
+        customer_id: Optional[str] = Query(None, description="Filter payments by specific customer alphanumeric ID"),
+        status: Optional[PaymentStatus] = Query(None, description="Filter by payment status (PENDING, COMPLETED, FAILED, REFUNDED)"),
+        merchant_name: Optional[str] = Query(None, description="Filter by merchant name (partial match, case-insensitive)")
     ) -> dict:
         """List payments with various filtering options"""
         params = {"page": page, "per_page": per_page}
         if customer_id:
             params["customer_id"] = customer_id
-        if start_date:
-            params["start_date"] = start_date
-        if end_date:
-            params["end_date"] = end_date
         if status:
-            # Convert enum to string for API compatibility
             params["status"] = status.value if hasattr(status, 'value') else str(status)
+        if merchant_name:
+            params["merchant_name"] = merchant_name
         return await api_client.get("/api/payments", params=params)
 
     @mcp.tool(

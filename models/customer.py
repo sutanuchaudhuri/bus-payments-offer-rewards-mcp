@@ -1,41 +1,42 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List
 from datetime import datetime, date
 
 class Customer(BaseModel):
-    """Customer entity model"""
-    id: int = Field(..., description="Unique customer identifier")
-    first_name: str = Field(..., description="Customer's first name")
-    last_name: str = Field(..., description="Customer's last name")
-    email: str = Field(..., description="Customer's email address")
-    phone: Optional[str] = Field(None, description="Customer's phone number")
+    """Customer entity representing an individual user of the payment system."""
+    id: Optional[int] = Field(None, description="Internal database ID (auto-generated)")
+    customer_id: str = Field(..., description="Alphanumeric customer identifier used for all API operations.")
+    first_name: str = Field(..., max_length=100, description="Customer's first name")
+    last_name: str = Field(..., max_length=100, description="Customer's last name")
+    email: EmailStr = Field(..., max_length=255, description="Customer's email address (must be unique)")
+    phone: Optional[str] = Field(None, max_length=20, description="Customer's phone number")
     date_of_birth: Optional[date] = Field(None, description="Customer's date of birth")
-    address: Optional[str] = Field(None, description="Customer's address")
-    created_at: Optional[datetime] = Field(None, description="Account creation timestamp")
+    address: Optional[str] = Field(None, description="Customer's mailing address")
+    created_at: Optional[datetime] = Field(None, description="Customer creation timestamp")
     updated_at: Optional[datetime] = Field(None, description="Last update timestamp")
 
 class CustomerCreate(BaseModel):
-    """Customer creation request model"""
-    first_name: str = Field(..., description="Customer's first name")
-    last_name: str = Field(..., description="Customer's last name")
-    email: str = Field(..., description="Customer's email address")
-    phone: Optional[str] = Field(None, description="Customer's phone number")
+    """Request payload for creating a new customer"""
+    first_name: str = Field(..., max_length=100, description="Customer's first name")
+    last_name: str = Field(..., max_length=100, description="Customer's last name")
+    email: EmailStr = Field(..., max_length=255, description="Customer's email address")
+    phone: Optional[str] = Field(None, max_length=20, description="Customer's phone number")
     date_of_birth: Optional[date] = Field(None, description="Customer's date of birth")
     address: Optional[str] = Field(None, description="Customer's address")
 
 class CustomerUpdate(BaseModel):
-    """Customer update request model"""
-    first_name: Optional[str] = Field(None, description="Customer's first name")
-    last_name: Optional[str] = Field(None, description="Customer's last name")
-    email: Optional[str] = Field(None, description="Customer's email address")
-    phone: Optional[str] = Field(None, description="Customer's phone number")
+    """Request payload for updating a customer"""
+    first_name: Optional[str] = Field(None, max_length=100, description="Customer's first name")
+    last_name: Optional[str] = Field(None, max_length=100, description="Customer's last name")
+    email: Optional[EmailStr] = Field(None, max_length=255, description="Customer's email address")
+    phone: Optional[str] = Field(None, max_length=20, description="Customer's phone number")
     date_of_birth: Optional[date] = Field(None, description="Customer's date of birth")
     address: Optional[str] = Field(None, description="Customer's address")
 
 class CustomerListResponse(BaseModel):
-    """Response model for customer list"""
+    """Paginated list of customers with metadata"""
     customers: List[Customer] = Field(..., description="List of customers")
-    total: int = Field(..., description="Total number of customers")
-    pages: int = Field(..., description="Total pages")
-    current_page: int = Field(..., description="Current page")
-    per_page: int = Field(..., description="Items per page")
+    total: int = Field(..., description="Total number of customers in system")
+    pages: int = Field(..., description="Total number of pages available")
+    current_page: int = Field(..., description="Current page number")
+    per_page: int = Field(..., description="Number of customers per page")

@@ -4,7 +4,7 @@ from typing import Optional
 import os
 from models import (
     Offer, OfferCreate, OfferUpdate, OfferListResponse, OfferActivationRequest,
-    OfferActivation, OfferCategoriesResponse, api_client, OfferCategory
+    OfferActivation, OfferCategory, api_client
 )
 
 def register_offer_tools(mcp: FastMCP):
@@ -25,12 +25,11 @@ def register_offer_tools(mcp: FastMCP):
         category: Optional[OfferCategory] = Query(None, description="Filter offers by category"),
         merchant_id: Optional[int] = Query(None, description="Filter offers by specific merchant ID"),
         is_active: Optional[bool] = Query(None, description="Filter by offer active status"),
-        customer_id: Optional[int] = Query(None, description="Include customer-specific offer data")
+        customer_id: Optional[str] = Query(None, description="Include customer-specific offer data (alphanumeric customer ID)")
     ) -> dict:
         """List available offers with filtering options"""
         params = {"page": page, "per_page": per_page}
         if category:
-            # Convert enum to string for API compatibility
             params["category"] = category.value if hasattr(category, 'value') else str(category)
         if merchant_id:
             params["merchant_id"] = merchant_id
@@ -38,7 +37,6 @@ def register_offer_tools(mcp: FastMCP):
             params["is_active"] = is_active
         if customer_id:
             params["customer_id"] = customer_id
-
         return await api_client.get("/api/offers", params=params)
 
     @mcp.tool(
@@ -100,11 +98,11 @@ def register_offer_tools(mcp: FastMCP):
         meta={"version": "1.0", "category": "offer_management"}
     )
     async def activate_offer_for_customer(
-        offer_id: int = Path(..., description="Offer ID to activate"),
-        activation: OfferActivationRequest = Body(..., description="Customer activation details")
+        offer_id: int = Path(..., description="Offer ID to activate for customer"),
+        activation: OfferActivationRequest = Body(..., description="Customer activation request (customer_id as int)")
     ) -> dict:
-        """Activate an offer for a specific customer"""
-        activation_data = activation.model_dump()
+        """Activate an offer for a customer"""
+        activation_data = activation.model_dump(exclude_unset=True)
         return await api_client.post(f"/api/offers/{offer_id}/activate", data=activation_data)
 
     @mcp.tool(

@@ -48,7 +48,7 @@ def register_customer_tools(mcp: FastMCP):
         tags={"customers", "details", "profile", "support"},
         meta={"version": "1.0", "category": "customer_management"}
     )
-    async def get_customer_details(customer_id: int = Path(..., description="Customer ID to retrieve")) -> dict:
+    async def get_customer_details(customer_id: str = Path(..., description="Customer alphanumeric ID to retrieve")) -> dict:
         """Get detailed customer information"""
         return await api_client.get(f"/api/customers/{customer_id}")
 
@@ -60,7 +60,7 @@ def register_customer_tools(mcp: FastMCP):
         enabled=customer_admin_enabled
     )
     async def update_customer(
-        customer_id: int = Path(..., description="Customer ID to update"),
+        customer_id: str = Path(..., description="Customer alphanumeric ID to update"),
         customer: CustomerUpdate = Body(..., description="Updated customer information")
     ) -> dict:
         """Update customer information"""
@@ -74,6 +74,6 @@ def register_customer_tools(mcp: FastMCP):
         meta={"version": "1.0", "category": "customer_management"},
         enabled=customer_admin_enabled
     )
-    async def delete_customer(customer_id: int = Path(..., description="Customer ID to delete")) -> dict:
+    async def delete_customer(customer_id: str = Path(..., description="Customer alphanumeric ID to delete")) -> dict:
         """Delete a customer account"""
         return await api_client.delete(f"/api/customers/{customer_id}")

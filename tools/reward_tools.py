@@ -16,7 +16,7 @@ def register_reward_tools(mcp: FastMCP):
         meta={"version": "1.0", "category": "rewards_management"}
     )
     async def get_customer_rewards(
-        customer_id: int = Path(..., description="Unique customer identifier to retrieve rewards for"),
+        customer_id: str = Path(..., description="Unique customer alphanumeric identifier to retrieve rewards for"),
         page: int = Query(1, description="Page number for pagination"),
         per_page: int = Query(10, description="Number of rewards per page"),
         status: Optional[RewardStatus] = Query(None, description="Filter by reward status")
@@ -24,8 +24,7 @@ def register_reward_tools(mcp: FastMCP):
         """Get all rewards for a specific customer - matches swagger GET /api/rewards/customer/{customer_id}"""
         params = {"page": page, "per_page": per_page}
         if status:
-            # Convert enum to string for API compatibility
-            params["status"] = str(status.value) if hasattr(status, 'value') else str(status)
+            params["status"] = status.value if hasattr(status, 'value') else str(status)
         return await api_client.get(f"/api/rewards/customer/{customer_id}", params=params)
 
     @mcp.tool(
@@ -55,9 +54,9 @@ def register_reward_tools(mcp: FastMCP):
         tags={"rewards", "balance_inquiry", "loyalty_program", "points_valuation"},
         meta={"version": "1.0", "category": "rewards_management"}
     )
-    async def get_customer_reward_balance(customer_id: int = Path(..., description="Unique customer identifier to check reward balance for")) -> dict:
+    async def get_customer_reward_balance(customer_id: str = Path(..., description="Unique customer alphanumeric identifier to check reward balance for")) -> dict:
         """Get the current reward point balance for a customer"""
-        return await api_client.get(f"/api/customers/{customer_id}/rewards/balance")
+        return await api_client.get(f"/api/rewards/customer/{customer_id}/balance")
 
     @mcp.tool(
         name="redeem_points",
@@ -66,12 +65,12 @@ def register_reward_tools(mcp: FastMCP):
         meta={"version": "1.0", "category": "rewards_management"}
     )
     async def redeem_points(
-        customer_id: int = Path(..., description="Unique customer identifier for point redemption"),
+        customer_id: str = Path(..., description="Unique customer alphanumeric identifier for point redemption"),
         request: RedeemPointsRequest = Body(..., description="Redemption request with points amount and optional description")
     ) -> dict:
         """Redeem reward points for a customer"""
         request_data = request.model_dump(exclude_unset=True)
-        return await api_client.post(f"/api/customers/{customer_id}/rewards/redeem", data=request_data)
+        return await api_client.post(f"/api/rewards/customer/{customer_id}/redeem", data=request_data)
 
     @mcp.tool(
         name="redeem_specific_reward",
@@ -94,13 +93,13 @@ def register_reward_tools(mcp: FastMCP):
         meta={"version": "1.0", "category": "rewards_management"}
     )
     async def get_redemption_history(
-        customer_id: int = Path(..., description="Customer ID to retrieve redemption history for"),
+        customer_id: str = Path(..., description="Customer alphanumeric ID to retrieve redemption history for"),
         page: int = Query(1, description="Page number for pagination"),
         per_page: int = Query(10, description="Number of redemptions per page"),
         start_date: Optional[str] = Query(None, description="Filter redemptions from this date (ISO format)"),
         end_date: Optional[str] = Query(None, description="Filter redemptions until this date (ISO format)")
     ) -> dict:
-        """Get customer's redemption history with date filtering - matches swagger GET /api/rewards/customer/{customer_id}/history"""
+        """Get redemption history for a customer"""
         params = {"page": page, "per_page": per_page}
         if start_date:
             params["start_date"] = start_date

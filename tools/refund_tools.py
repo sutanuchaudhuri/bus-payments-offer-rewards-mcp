@@ -18,7 +18,7 @@ def register_refund_tools(mcp: FastMCP):
     async def list_refunds(
         page: int = Query(1, description="Page number for pagination"),
         per_page: int = Query(10, description="Number of refunds per page"),
-        customer_id: Optional[int] = Query(None, description="Filter refunds by specific customer ID"),
+        customer_id: Optional[str] = Query(None, description="Filter refunds by specific customer alphanumeric ID"),
         status: Optional[RefundStatus] = Query(None, description="Filter by refund status"),
         refund_type: Optional[RefundType] = Query(None, description="Filter by refund type")
     ) -> dict:
@@ -27,11 +27,9 @@ def register_refund_tools(mcp: FastMCP):
         if customer_id:
             params["customer_id"] = customer_id
         if status:
-            # Ensure enum is converted to string - API expects string values per swagger.json
-            params["status"] = str(status.value) if hasattr(status, 'value') else str(status)
+            params["status"] = status.value if hasattr(status, 'value') else str(status)
         if refund_type:
-            # Ensure enum is converted to string - API expects string values per swagger.json
-            params["refund_type"] = str(refund_type.value) if hasattr(refund_type, 'value') else str(refund_type)
+            params["refund_type"] = refund_type.value if hasattr(refund_type, 'value') else str(refund_type)
         return await api_client.get("/api/refunds", params=params)
 
     @mcp.tool(
@@ -43,7 +41,7 @@ def register_refund_tools(mcp: FastMCP):
     async def submit_refund_request(refund: RefundRequest = Body(..., description="Refund request details including type, amount, reason, and related transaction information")) -> dict:
         """Submit a new refund request"""
         refund_data = refund.model_dump(exclude_unset=True)
-        return await api_client.post("/api/refunds", data=refund_data)
+        return await api_client.post("/api/refunds/request", data=refund_data)
 
     @mcp.tool(
         name="get_refund_details",
@@ -92,4 +90,4 @@ def register_refund_tools(mcp: FastMCP):
     async def request_points_refund(points_refund: PointsRefundRequest = Body(..., description="Points refund request with customer ID, points amount, and reason")) -> dict:
         """Request a points redemption cancellation/refund"""
         refund_data = points_refund.model_dump(exclude_unset=True)
-        return await api_client.post("/api/refunds/points", data=refund_data)
+        return await api_client.post("/api/refunds/points/cancel", data=refund_data)

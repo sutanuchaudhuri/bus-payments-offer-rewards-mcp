@@ -11,7 +11,7 @@ from .merchant import (
 )
 from .offer import (
     Offer, OfferCreate, OfferUpdate, OfferActivationRequest, OfferActivation,
-    OfferListResponse, OfferCategoryInfo, OfferCategoriesResponse, OfferStatistics
+    OfferListResponse, OfferCategoryInfo, OfferStatistics
 )
 from .payment import (
     Payment, PaymentCreate, PaymentRefund, PaymentListResponse, SpendingAnalytics
@@ -63,7 +63,7 @@ __all__ = [
 
     # Offer models
     "Offer", "OfferCreate", "OfferUpdate", "OfferActivationRequest", "OfferActivation",
-    "OfferListResponse", "OfferCategoryInfo", "OfferCategoriesResponse", "OfferStatistics",
+    "OfferListResponse", "OfferCategoryInfo", "OfferStatistics",
 
     # Payment models
     "Payment", "PaymentCreate", "PaymentRefund", "PaymentListResponse", "SpendingAnalytics",

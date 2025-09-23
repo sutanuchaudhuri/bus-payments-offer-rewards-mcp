@@ -4,7 +4,7 @@ from datetime import datetime
 from .enums import RewardStatus
 
 class Reward(BaseModel):
-    """Reward entity model"""
+    """Reward points lifecycle status tracking."""
     id: int = Field(..., description="Unique reward identifier")
     customer_id: int = Field(..., description="Customer who earned the reward")
     payment_id: Optional[int] = Field(None, description="Associated payment ID")
@@ -21,7 +21,7 @@ class Reward(BaseModel):
 class RewardCreate(BaseModel):
     """Manual reward creation request model"""
     customer_id: int = Field(..., description="Customer ID")
-    points_earned: int = Field(..., description="Points to award", ge=1)
+    points_earned: int = Field(..., ge=1, description="Points to award")
     description: str = Field(..., description="Reward description")
     offer_id: Optional[int] = Field(None, description="Associated offer ID")
     dollar_value: Optional[float] = Field(None, description="Dollar value of reward")
@@ -29,12 +29,12 @@ class RewardCreate(BaseModel):
 
 class RedeemPointsRequest(BaseModel):
     """Redeem points request model"""
-    points: int = Field(..., description="Number of points to redeem", ge=1)
+    points: int = Field(..., ge=1, description="Number of points to redeem")
     description: Optional[str] = Field(None, description="Description of redemption")
 
 class RewardRedemption(BaseModel):
     """Reward redemption model"""
-    points: Optional[int] = Field(None, description="Points to redeem from specific reward", ge=1)
+    points: Optional[int] = Field(None, ge=1, description="Points to redeem from specific reward")
 
 class CustomerBalance(BaseModel):
     """Customer points balance model"""
