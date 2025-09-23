@@ -10,32 +10,6 @@ def register_reward_tools(mcp: FastMCP):
     """Register reward-related MCP tools"""
 
     @mcp.tool(
-        name="list_rewards",
-        description="Retrieve a comprehensive list of all rewards in the system with filtering by customer, status, and date range. Returns detailed reward information including points earned, sources, expiry dates, and redemption status for rewards program administration and analytics.",
-        tags={"rewards", "loyalty_program", "administration", "reporting"},
-        meta={"version": "1.0", "category": "rewards_management"}
-    )
-    async def list_rewards(
-        page: int = Query(1, description="Page number for pagination"),
-        per_page: int = Query(10, description="Number of rewards per page"),
-        customer_id: Optional[int] = Query(None, description="Filter rewards by specific customer ID"),
-        status: Optional[RewardStatus] = Query(None, description="Filter by reward status"),
-        start_date: Optional[str] = Query(None, description="Filter rewards from this date (YYYY-MM-DD)"),
-        end_date: Optional[str] = Query(None, description="Filter rewards until this date (YYYY-MM-DD)")
-    ) -> dict:
-        """List all rewards with filtering options"""
-        params = {"page": page, "per_page": per_page}
-        if customer_id:
-            params["customer_id"] = customer_id
-        if status:
-            params["status"] = status.value
-        if start_date:
-            params["start_date"] = start_date
-        if end_date:
-            params["end_date"] = end_date
-        return await api_client.get("/api/rewards", params=params)
-
-    @mcp.tool(
         name="get_customer_rewards",
         description="Retrieve a comprehensive list of all rewards earned by a specific customer including points from transactions, offer bonuses, and promotional rewards. Returns detailed reward history with earning dates, sources, expiry information, and redemption status for loyalty program management.",
         tags={"rewards", "loyalty_program", "customer_benefits", "points_tracking"},
@@ -44,11 +18,15 @@ def register_reward_tools(mcp: FastMCP):
     async def get_customer_rewards(
         customer_id: int = Path(..., description="Unique customer identifier to retrieve rewards for"),
         page: int = Query(1, description="Page number for pagination"),
-        per_page: int = Query(10, description="Number of rewards per page")
+        per_page: int = Query(10, description="Number of rewards per page"),
+        status: Optional[RewardStatus] = Query(None, description="Filter by reward status")
     ) -> dict:
-        """Get all rewards for a specific customer"""
+        """Get all rewards for a specific customer - matches swagger GET /api/rewards/customer/{customer_id}"""
         params = {"page": page, "per_page": per_page}
-        return await api_client.get(f"/api/customers/{customer_id}/rewards", params=params)
+        if status:
+            # Convert enum to string for API compatibility
+            params["status"] = str(status.value) if hasattr(status, 'value') else str(status)
+        return await api_client.get(f"/api/rewards/customer/{customer_id}", params=params)
 
     @mcp.tool(
         name="create_reward",
@@ -111,15 +89,21 @@ def register_reward_tools(mcp: FastMCP):
 
     @mcp.tool(
         name="get_redemption_history",
-        description="Retrieve comprehensive redemption history for a customer including all point redemptions, dates, amounts, descriptions, and current status. Provides complete audit trail of loyalty program utilization for customer service and analytics.",
+        description="Retrieve comprehensive redemption history for a customer including all point redemptions, dates, amounts, descriptions, and current status with date range filtering. Provides complete audit trail of loyalty program utilization for customer service and analytics.",
         tags={"rewards", "redemption_history", "audit_trail", "customer_service"},
         meta={"version": "1.0", "category": "rewards_management"}
     )
     async def get_redemption_history(
         customer_id: int = Path(..., description="Customer ID to retrieve redemption history for"),
         page: int = Query(1, description="Page number for pagination"),
-        per_page: int = Query(10, description="Number of redemptions per page")
+        per_page: int = Query(10, description="Number of redemptions per page"),
+        start_date: Optional[str] = Query(None, description="Filter redemptions from this date (ISO format)"),
+        end_date: Optional[str] = Query(None, description="Filter redemptions until this date (ISO format)")
     ) -> dict:
-        """Get customer's redemption history"""
+        """Get customer's redemption history with date filtering - matches swagger GET /api/rewards/customer/{customer_id}/history"""
         params = {"page": page, "per_page": per_page}
-        return await api_client.get(f"/api/customers/{customer_id}/rewards/redemptions", params=params)
+        if start_date:
+            params["start_date"] = start_date
+        if end_date:
+            params["end_date"] = end_date
+        return await api_client.get(f"/api/rewards/customer/{customer_id}/history", params=params)

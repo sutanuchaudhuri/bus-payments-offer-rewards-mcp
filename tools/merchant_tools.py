@@ -1,6 +1,7 @@
 from fastmcp import FastMCP
 from fastapi import Query, Path, Body
 from typing import Optional
+import os
 from models import (
     Merchant, MerchantCreate, MerchantUpdate, MerchantListResponse,
     MerchantAnalytics, MerchantCategoriesResponse, MerchantCategory, api_client
@@ -9,11 +10,15 @@ from models import (
 def register_merchant_tools(mcp: FastMCP):
     """Register merchant-related MCP tools"""
 
+    # Read admin tools enabled setting from environment
+    admin_tools_enabled = os.getenv("ADMIN_TOOLS_ENABLED", "false").lower() == "true"
+
     @mcp.tool(
         name="list_merchants",
         description="Retrieve a paginated list of all merchants in the system with optional filtering by category and active status. Supports pagination and returns merchant details including business information, contact details, and activity status for comprehensive merchant management.",
         tags={"merchants", "catalog", "business", "search"},
-        meta={"version": "1.0", "category": "merchant_management"}
+        meta={"version": "1.0", "category": "merchant_management"},
+
     )
     async def list_merchants(
         page: int = Query(1, description="Page number for pagination"),
@@ -24,7 +29,8 @@ def register_merchant_tools(mcp: FastMCP):
         """List all merchants with filtering options"""
         params = {"page": page, "per_page": per_page}
         if category:
-            params["category"] = category.value
+            # Convert enum to string for API compatibility
+            params["category"] = category.value if hasattr(category, 'value') else str(category)
         if is_active is not None:
             params["is_active"] = is_active
         return await api_client.get("/api/merchants", params=params)
@@ -33,7 +39,8 @@ def register_merchant_tools(mcp: FastMCP):
         name="create_merchant",
         description="Register a new merchant in the system with comprehensive business details including name, category, contact information, website, and address. Creates a unique merchant account for payment processing, offer management, and transaction tracking.",
         tags={"merchants", "registration", "business", "onboarding"},
-        meta={"version": "1.0", "category": "merchant_management"}
+        meta={"version": "1.0", "category": "merchant_management"},
+        enabled=admin_tools_enabled
     )
     async def create_merchant(merchant: MerchantCreate = Body(..., description="Complete merchant registration details including business name, category, contact information, and operational details")) -> dict:
         """Create a new merchant account"""
@@ -56,7 +63,8 @@ def register_merchant_tools(mcp: FastMCP):
         name="update_merchant",
         description="Update existing merchant information including business name, category, contact details, website, and operational status. Supports partial updates while maintaining data integrity and business continuity.",
         tags={"merchants", "update", "profile_management", "business"},
-        meta={"version": "1.0", "category": "merchant_management"}
+        meta={"version": "1.0", "category": "merchant_management"},
+        enabled=admin_tools_enabled
     )
     async def update_merchant(
         merchant_id: int = Path(..., description="Merchant ID to update"),
@@ -72,7 +80,8 @@ def register_merchant_tools(mcp: FastMCP):
         name="delete_merchant",
         description="Remove a merchant from the system. Permanently deletes merchant profile and associated data. Use with caution as this action cannot be undone and may affect related transactions and offers.",
         tags={"merchants", "deletion", "cleanup", "business"},
-        meta={"version": "1.0", "category": "merchant_management"}
+        meta={"version": "1.0", "category": "merchant_management"},
+        enabled=admin_tools_enabled
     )
     async def delete_merchant(merchant_id: int = Path(..., description="Merchant ID to delete")) -> dict:
         """Delete a merchant"""
@@ -92,7 +101,8 @@ def register_merchant_tools(mcp: FastMCP):
         name="get_merchant_analytics",
         description="Retrieve comprehensive analytics data for a specific merchant including transaction volumes, amounts, offer usage statistics, and performance metrics over specified time periods for business intelligence and reporting.",
         tags={"merchants", "analytics", "reporting", "performance", "business_intelligence"},
-        meta={"version": "1.0", "category": "merchant_management"}
+        meta={"version": "1.0", "category": "merchant_management"},
+        enabled=admin_tools_enabled
     )
     async def get_merchant_analytics(
         merchant_id: int = Path(..., description="Merchant ID for analytics"),

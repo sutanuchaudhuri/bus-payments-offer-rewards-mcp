@@ -3,7 +3,7 @@ from fastapi import Query, Path, Body
 from typing import Optional
 from models import (
     Refund, RefundRequest, PointsRefundRequest, RefundApproval, RefundDenial,
-    RefundListResponse, RefundStatus, api_client
+    RefundListResponse, RefundStatus, RefundType, api_client
 )
 
 def register_refund_tools(mcp: FastMCP):
@@ -11,7 +11,7 @@ def register_refund_tools(mcp: FastMCP):
 
     @mcp.tool(
         name="list_refunds",
-        description="Retrieve a comprehensive list of all refund requests in the system with filtering by customer, status, type, and date range. Returns detailed refund information including amounts, reasons, status, processing dates, and admin notes for refund management and analytics.",
+        description="Retrieve a comprehensive list of all refund requests in the system with filtering by customer, status, and type. Returns detailed refund information including amounts, reasons, status, processing dates, and admin notes for refund management and analytics.",
         tags={"refunds", "customer_service", "disputes", "financial_operations"},
         meta={"version": "1.0", "category": "refund_management"}
     )
@@ -20,22 +20,18 @@ def register_refund_tools(mcp: FastMCP):
         per_page: int = Query(10, description="Number of refunds per page"),
         customer_id: Optional[int] = Query(None, description="Filter refunds by specific customer ID"),
         status: Optional[RefundStatus] = Query(None, description="Filter by refund status"),
-        refund_type: Optional[str] = Query(None, description="Filter by refund type"),
-        start_date: Optional[str] = Query(None, description="Filter refunds from this date (YYYY-MM-DD)"),
-        end_date: Optional[str] = Query(None, description="Filter refunds until this date (YYYY-MM-DD)")
+        refund_type: Optional[RefundType] = Query(None, description="Filter by refund type")
     ) -> dict:
         """List all refunds with filtering options"""
         params = {"page": page, "per_page": per_page}
         if customer_id:
             params["customer_id"] = customer_id
         if status:
-            params["status"] = status.value
+            # Ensure enum is converted to string - API expects string values per swagger.json
+            params["status"] = str(status.value) if hasattr(status, 'value') else str(status)
         if refund_type:
-            params["refund_type"] = refund_type
-        if start_date:
-            params["start_date"] = start_date
-        if end_date:
-            params["end_date"] = end_date
+            # Ensure enum is converted to string - API expects string values per swagger.json
+            params["refund_type"] = str(refund_type.value) if hasattr(refund_type, 'value') else str(refund_type)
         return await api_client.get("/api/refunds", params=params)
 
     @mcp.tool(

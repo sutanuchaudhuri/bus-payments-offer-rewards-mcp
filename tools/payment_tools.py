@@ -32,7 +32,8 @@ def register_payment_tools(mcp: FastMCP):
         if end_date:
             params["end_date"] = end_date
         if status:
-            params["status"] = status.value
+            # Convert enum to string for API compatibility
+            params["status"] = status.value if hasattr(status, 'value') else str(status)
         return await api_client.get("/api/payments", params=params)
 
     @mcp.tool(

@@ -1,6 +1,7 @@
 from fastmcp import FastMCP
 from fastapi import Query, Path, Body
 from typing import Optional
+import os
 from models import (
     Offer, OfferCreate, OfferUpdate, OfferListResponse, OfferActivationRequest,
     OfferActivation, OfferCategoriesResponse, api_client, OfferCategory
@@ -8,6 +9,9 @@ from models import (
 
 def register_offer_tools(mcp: FastMCP):
     """Register offer-related MCP tools"""
+
+    # Read offer admin tools enabled setting from environment
+    offer_admin_enabled = os.getenv("OFFER_ADMIN_ENABLED", "false").lower() == "true"
 
     @mcp.tool(
         name="list_offers",
@@ -26,7 +30,8 @@ def register_offer_tools(mcp: FastMCP):
         """List available offers with filtering options"""
         params = {"page": page, "per_page": per_page}
         if category:
-            params["category"] = category.value
+            # Convert enum to string for API compatibility
+            params["category"] = category.value if hasattr(category, 'value') else str(category)
         if merchant_id:
             params["merchant_id"] = merchant_id
         if is_active is not None:
@@ -40,7 +45,8 @@ def register_offer_tools(mcp: FastMCP):
         name="create_offer",
         description="Create a new promotional offer with comprehensive details including discount percentages, reward points, validity periods, merchant associations, and terms & conditions. Supports various offer types for targeted marketing campaigns and customer engagement.",
         tags={"offers", "promotions", "campaign_creation", "marketing", "discounts"},
-        meta={"version": "1.0", "category": "offer_management"}
+        meta={"version": "1.0", "category": "offer_management"},
+        enabled=offer_admin_enabled
     )
     async def create_offer(offer: OfferCreate = Body(..., description="Complete offer details including title, description, discount terms, validity period, and merchant association")) -> dict:
         """Create a new offer"""
@@ -63,7 +69,8 @@ def register_offer_tools(mcp: FastMCP):
         name="update_offer",
         description="Update an existing promotional offer with new details, terms, or status. Allows modification of discount percentages, validity periods, merchant associations, and activation status for ongoing campaign optimization.",
         tags={"offers", "update", "campaign_management", "optimization"},
-        meta={"version": "1.0", "category": "offer_management"}
+        meta={"version": "1.0", "category": "offer_management"},
+        enabled=offer_admin_enabled
     )
     async def update_offer(
         offer_id: int = Path(..., description="Offer ID to update"),
@@ -79,7 +86,8 @@ def register_offer_tools(mcp: FastMCP):
         name="delete_offer",
         description="Delete an offer from the system (only allowed if no active customer activations exist). Permanently removes the offer and all associated data for system cleanup and offer lifecycle management.",
         tags={"offers", "delete", "cleanup", "lifecycle"},
-        meta={"version": "1.0", "category": "offer_management"}
+        meta={"version": "1.0", "category": "offer_management"},
+        enabled=offer_admin_enabled
     )
     async def delete_offer(offer_id: int = Path(..., description="Offer ID to delete")) -> dict:
         """Delete an offer"""
@@ -123,7 +131,8 @@ def register_offer_tools(mcp: FastMCP):
         name="expire_offer",
         description="Manually expire an offer by setting its expiry date to current time and deactivating it. Immediately stops all offer availability and customer activations for emergency campaign termination.",
         tags={"offers", "expire", "emergency", "termination"},
-        meta={"version": "1.0", "category": "offer_management"}
+        meta={"version": "1.0", "category": "offer_management"},
+        enabled=offer_admin_enabled
     )
     async def expire_offer(offer_id: int = Path(..., description="Offer ID to expire")) -> dict:
         """Manually expire an offer"""
