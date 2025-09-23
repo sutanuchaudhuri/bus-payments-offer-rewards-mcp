@@ -67,10 +67,8 @@ class RewardStatus(str, Enum):
     REDEEMED = "REDEEMED"
     EXPIRED = "EXPIRED"
 
-class TokenType(str, Enum):
-    SINGLE_USE = "SINGLE_USE"
-    MULTI_USE = "MULTI_USE"
-    RECURRING = "RECURRING"
+# Note: TokenType enum removed as it's not defined in swagger.json schemas
+# Token endpoints exist but use string values directly
 
 # Alias for backward compatibility
 ProductType = CreditCardProduct

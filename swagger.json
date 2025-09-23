@@ -2,24 +2,29 @@
   "components": {
     "schemas": {
       "BookingStatus": {
+        "description": "External service booking status for travel and merchant integrations.\nTracks booking lifecycle from confirmation through completion or cancellation.\nRefund eligibility depends on booking status and cancellation policies.\n",
         "enum": [
           "CONFIRMED",
           "CANCELLED",
           "COMPLETED",
           "REFUNDED"
         ],
+        "example": "CONFIRMED",
         "type": "string"
       },
       "CreditCardProduct": {
+        "description": "Credit card product tiers determining reward multipliers and benefits.\nEach tier offers different reward rates and credit limits:\n- PLATINUM: 3x rewards, highest credit limits, premium benefits\n- GOLD: 2x rewards, high credit limits, enhanced benefits  \n- SILVER: 1.5x rewards, moderate credit limits, standard benefits\n- BASIC: 1x rewards, basic credit limits, essential benefits\n",
         "enum": [
           "BASIC",
           "SILVER",
           "GOLD",
           "PLATINUM"
         ],
+        "example": "GOLD",
         "type": "string"
       },
       "MerchantCategory": {
+        "description": "Merchant business categories for payment classification and offer targeting.\nUsed to categorize merchants for analytics, offer matching, and reward calculations.\nEach category supports specific business rules and promotional strategies.\n",
         "enum": [
           "RESTAURANT",
           "RETAIL_STORE",
@@ -43,9 +48,11 @@
           "FINANCIAL_SERVICE",
           "FITNESS_CENTER"
         ],
+        "example": "RESTAURANT",
         "type": "string"
       },
       "OfferCategory": {
+        "description": "Offer categories for targeted promotions and customer engagement.\nCategories align with merchant types and customer spending patterns.\nUsed for offer filtering, analytics, and personalized recommendations.\n",
         "enum": [
           "TRAVEL",
           "MERCHANT",
@@ -54,18 +61,22 @@
           "FUEL",
           "SHOPPING"
         ],
+        "example": "TRAVEL",
         "type": "string"
       },
       "PaymentStatus": {
+        "description": "Payment transaction status lifecycle tracking.\nStatus progression: PENDING \u2192 COMPLETED/FAILED/REFUNDED\n- PENDING: Payment initiated but not yet processed\n- COMPLETED: Payment successfully processed and credited\n- FAILED: Payment processing failed due to insufficient funds or technical issues\n- REFUNDED: Payment amount returned to customer credit limit\n",
         "enum": [
           "PENDING",
           "COMPLETED",
           "FAILED",
           "REFUNDED"
         ],
+        "example": "COMPLETED",
         "type": "string"
       },
       "RefundStatus": {
+        "description": "Refund request processing status with defined workflow:\nREQUESTED \u2192 APPROVED/DENIED \u2192 PROCESSED \u2192 COMPLETED\nProcessing times vary by refund type (3-5 business days typical)\n",
         "enum": [
           "REQUESTED",
           "APPROVED",
@@ -74,28 +85,41 @@
           "COMPLETED",
           "CANCELLED"
         ],
+        "example": "APPROVED",
         "type": "string"
       },
       "RefundType": {
+        "description": "Types of refund requests supported by the system.\nEach type has different processing rules and approval workflows:\n- booking_cancellation: Refunds for cancelled travel/service bookings\n- dispute_resolution: Refunds for disputed transactions or service issues\n- goodwill: Discretionary refunds for customer satisfaction\n",
         "enum": [
           "booking_cancellation",
           "dispute_resolution",
           "goodwill"
         ],
+        "example": "booking_cancellation",
         "type": "string"
       },
       "RewardStatus": {
+        "description": "Reward points lifecycle status tracking.\nPoints automatically expire after 365 days if not redeemed.\nEARNED \u2192 REDEEMED/EXPIRED progression with balance tracking.\n",
         "enum": [
           "EARNED",
           "REDEEMED",
           "EXPIRED"
         ],
+        "example": "EARNED",
         "type": "string"
       }
     }
   },
   "info": {
-    "description": "Comprehensive API for bus payment system with offers, rewards, bookings, and refunds",
+    "contact": {
+      "email": "support@buspayments.com",
+      "name": "API Support"
+    },
+    "description": "## Comprehensive Bus Payment System with Integrated Offers & Rewards Platform\n\nThis API provides a complete payment processing ecosystem for bus transportation services, featuring:\n\n### Core Features\n- **Customer Management**: Complete customer lifecycle management with profile tracking\n- **Credit Card Processing**: Multi-tier credit card support with real-time balance management\n- **Payment Processing**: Secure payment processing with automatic reward calculation\n- **Dynamic Offers**: Category-based offer system with merchant integration\n- **Rewards Program**: Point-based rewards with multiple redemption options\n- **Refund Management**: Comprehensive refund processing for various scenarios\n- **Token Management**: Secure card tokenization for enhanced security\n\n### Business Logic\n- Reward points calculated based on card tier: Platinum (3x), Gold (2x), Silver (1.5x), Basic (1x)\n- Offers support activation limits and usage tracking per customer\n- Credit limit validation ensures payments don't exceed available credit\n- Automatic expiry management for rewards (365 days from earning)\n- Real-time credit utilization tracking and updates\n\n### Integration Capabilities\n- Travel booking integration (flights, hotels)\n- Shopping platform integration\n- Merchant analytics and reporting\n- External service booking management\n\n### Security Features\n- Card number masking in all responses\n- Secure tokenization for payment processing\n- Credit limit validation and fraud prevention\n\nFor detailed API usage examples, see the Bruno collection included with this project.\n",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    },
     "title": "Bus Payments & Rewards API",
     "version": "1.0.0"
   },
@@ -103,6 +127,7 @@
   "paths": {
     "/": {
       "get": {
+        "description": "Root endpoint providing API metadata and navigation links.\nReturns version information, documentation URLs, and available endpoints.\nUseful for API discovery and client configuration.\n",
         "responses": {
           "200": {
             "content": {
@@ -110,15 +135,23 @@
                 "schema": {
                   "properties": {
                     "docs": {
+                      "description": "Swagger documentation URL",
+                      "example": "/docs",
                       "type": "string"
                     },
                     "health": {
+                      "description": "Health check endpoint URL",
+                      "example": "/api/health",
                       "type": "string"
                     },
                     "message": {
+                      "description": "API welcome message",
+                      "example": "Bus Payments & Rewards API",
                       "type": "string"
                     },
                     "version": {
+                      "description": "Current API version",
+                      "example": "1.0.0",
                       "type": "string"
                     }
                   },
@@ -126,10 +159,10 @@
                 }
               }
             },
-            "description": "API information"
+            "description": "API information and available endpoints"
           }
         },
-        "summary": "API information",
+        "summary": "API information and documentation links",
         "tags": [
           "General"
         ]
@@ -223,27 +256,35 @@
     },
     "/api/customers": {
       "get": {
+        "description": "Retrieves a paginated list of all customers in the system.\n\n**Features:**\n- Pagination support with configurable page size\n- Email-based filtering for customer lookup\n- Returns customer count and pagination metadata\n\n**Business Rules:**\n- Maximum 100 customers per page (configurable)\n- Results ordered by creation date (newest first)\n- Email filtering supports partial matches\n\n**Use Cases:**\n- Customer service lookup\n- Administrative customer management\n- Customer list generation for reports\n",
         "parameters": [
           {
+            "description": "Page number for pagination (1-based)",
             "in": "query",
             "name": "page",
             "schema": {
               "default": 1,
+              "minimum": 1,
               "type": "integer"
             }
           },
           {
+            "description": "Number of customers per page",
             "in": "query",
             "name": "per_page",
             "schema": {
               "default": 10,
+              "maximum": 100,
+              "minimum": 1,
               "type": "integer"
             }
           },
           {
+            "description": "Filter customers by email address (partial match supported)",
             "in": "query",
             "name": "email",
             "schema": {
+              "format": "email",
               "type": "string"
             }
           }
@@ -255,21 +296,70 @@
                 "schema": {
                   "properties": {
                     "current_page": {
+                      "description": "Current page number",
                       "type": "integer"
                     },
                     "customers": {
                       "items": {
+                        "properties": {
+                          "address": {
+                            "description": "Customer's address",
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "description": "Account creation timestamp",
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "date_of_birth": {
+                            "description": "Customer's date of birth (YYYY-MM-DD)",
+                            "format": "date",
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "email": {
+                            "description": "Customer's email address (unique)",
+                            "format": "email",
+                            "type": "string"
+                          },
+                          "first_name": {
+                            "description": "Customer's first name",
+                            "type": "string"
+                          },
+                          "id": {
+                            "description": "Unique customer identifier",
+                            "type": "integer"
+                          },
+                          "last_name": {
+                            "description": "Customer's last name",
+                            "type": "string"
+                          },
+                          "phone": {
+                            "description": "Customer's phone number",
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "description": "Last update timestamp",
+                            "format": "date-time",
+                            "type": "string"
+                          }
+                        },
                         "type": "object"
                       },
                       "type": "array"
                     },
                     "pages": {
+                      "description": "Total number of pages available",
                       "type": "integer"
                     },
                     "per_page": {
+                      "description": "Number of customers per page",
                       "type": "integer"
                     },
                     "total": {
+                      "description": "Total number of customers in system",
                       "type": "integer"
                     }
                   },
@@ -277,38 +367,74 @@
                 }
               }
             },
-            "description": "List of customers"
+            "description": "Paginated list of customers with metadata"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "example": "Internal server error",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Internal server error"
           }
         },
-        "summary": "List all customers",
+        "summary": "List all customers with pagination and filtering",
         "tags": [
           "Customers"
         ]
       },
       "post": {
+        "description": "Creates a new customer account in the system.\n\n**Validation Rules:**\n- Email must be unique across all customers\n- First name and last name are required\n- Date of birth must be in YYYY-MM-DD format\n- Phone and address are optional\n\n**Business Logic:**\n- Automatically sets creation and update timestamps\n- Email uniqueness validation prevents duplicates\n- Returns complete customer profile upon successful creation\n\n**Security:**\n- Input validation and sanitization applied\n- SQL injection protection enabled\n",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "properties": {
                   "address": {
+                    "description": "Customer's address (optional)",
+                    "example": "123 Main St, City, State 12345",
+                    "maxLength": 500,
                     "type": "string"
                   },
                   "date_of_birth": {
+                    "description": "Customer's date of birth in YYYY-MM-DD format (optional)",
+                    "example": "1990-01-15",
                     "format": "date",
                     "type": "string"
                   },
                   "email": {
+                    "description": "Customer's email address (unique, required)",
+                    "example": "john.doe@example.com",
                     "format": "email",
+                    "maxLength": 255,
                     "type": "string"
                   },
                   "first_name": {
+                    "description": "Customer's first name (required)",
+                    "example": "John",
+                    "maxLength": 100,
+                    "minLength": 1,
                     "type": "string"
                   },
                   "last_name": {
+                    "description": "Customer's last name (required)",
+                    "example": "Doe",
+                    "maxLength": 100,
+                    "minLength": 1,
                     "type": "string"
                   },
                   "phone": {
+                    "description": "Customer's phone number (optional)",
+                    "example": "+1-555-123-4567",
+                    "maxLength": 20,
                     "type": "string"
                   }
                 },
@@ -325,16 +451,66 @@
         },
         "responses": {
           "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "customer": {
+                      "description": "Complete customer profile",
+                      "type": "object"
+                    },
+                    "message": {
+                      "example": "Customer created successfully",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
             "description": "Customer created successfully"
           },
           "400": {
-            "description": "Invalid data"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "examples": {
+                        "invalid_date": "Invalid date format. Use YYYY-MM-DD",
+                        "invalid_email": "Invalid email format",
+                        "missing_field": "first_name is required"
+                      },
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Invalid input data or validation error"
           },
           "409": {
-            "description": "Email already exists"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "example": "Email already exists",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Email address already exists"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         },
-        "summary": "Create new customer",
+        "summary": "Create new customer account",
         "tags": [
           "Customers"
         ]
@@ -652,6 +828,7 @@
     },
     "/api/health": {
       "get": {
+        "description": "Provides system health status for monitoring and load balancing.\nReturns service status, timestamp, and basic system information.\nUsed by monitoring tools to verify service availability.\n",
         "responses": {
           "200": {
             "content": {
@@ -659,9 +836,12 @@
                 "schema": {
                   "properties": {
                     "status": {
+                      "description": "Current service health status",
+                      "example": "healthy",
                       "type": "string"
                     },
                     "timestamp": {
+                      "description": "UTC timestamp of health check",
                       "format": "date-time",
                       "type": "string"
                     }
@@ -670,7 +850,7 @@
                 }
               }
             },
-            "description": "Service is healthy"
+            "description": "Service is healthy and operational"
           }
         },
         "summary": "Health check endpoint",
@@ -2393,31 +2573,40 @@
     },
     "/api/payments": {
       "get": {
+        "description": "Retrieves a paginated list of payment transactions with advanced filtering capabilities.\n\n**Features:**\n- Multi-criteria filtering (customer, status, merchant)\n- Pagination with configurable page size\n- Join with credit card data for customer association\n- Ordered by transaction date (newest first)\n\n**Business Rules:**\n- Only completed payments are included in analytics\n- Refunded payments maintain original transaction data\n- Status filtering supports enum validation\n- Merchant name filtering uses case-insensitive partial matching\n\n**Use Cases:**\n- Transaction history review\n- Payment reconciliation\n- Customer service inquiries\n- Financial reporting and analytics\n",
         "parameters": [
           {
+            "description": "Page number for pagination (1-based)",
             "in": "query",
             "name": "page",
             "schema": {
               "default": 1,
+              "minimum": 1,
               "type": "integer"
             }
           },
           {
+            "description": "Number of payments per page",
             "in": "query",
             "name": "per_page",
             "schema": {
               "default": 10,
+              "maximum": 100,
+              "minimum": 1,
               "type": "integer"
             }
           },
           {
+            "description": "Filter payments by specific customer ID",
             "in": "query",
             "name": "customer_id",
             "schema": {
+              "minimum": 1,
               "type": "integer"
             }
           },
           {
+            "description": "Filter payments by transaction status",
             "in": "query",
             "name": "status",
             "schema": {
@@ -2425,44 +2614,160 @@
             }
           },
           {
+            "description": "Filter payments by merchant name (partial match, case-insensitive)",
             "in": "query",
             "name": "merchant_name",
             "schema": {
+              "minLength": 1,
               "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "List of payments"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "current_page": {
+                      "description": "Current page number",
+                      "type": "integer"
+                    },
+                    "pages": {
+                      "description": "Total number of pages available",
+                      "type": "integer"
+                    },
+                    "payments": {
+                      "items": {
+                        "properties": {
+                          "amount": {
+                            "description": "Payment amount in currency units",
+                            "format": "float",
+                            "type": "number"
+                          },
+                          "created_at": {
+                            "description": "Record creation timestamp",
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "credit_card_id": {
+                            "description": "Associated credit card ID",
+                            "type": "integer"
+                          },
+                          "description": {
+                            "description": "Transaction description or memo",
+                            "type": "string"
+                          },
+                          "id": {
+                            "description": "Unique payment identifier",
+                            "type": "integer"
+                          },
+                          "merchant_category": {
+                            "description": "Merchant business category",
+                            "type": "string"
+                          },
+                          "merchant_name": {
+                            "description": "Merchant or service provider name",
+                            "type": "string"
+                          },
+                          "reference_number": {
+                            "description": "Unique transaction reference (format: PAY-YYYYMMDD-XXXXXXXX)",
+                            "type": "string"
+                          },
+                          "status": {
+                            "$ref": "#/components/schemas/PaymentStatus"
+                          },
+                          "transaction_date": {
+                            "description": "UTC timestamp of transaction",
+                            "format": "date-time",
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "per_page": {
+                      "description": "Number of payments per page",
+                      "type": "integer"
+                    },
+                    "total": {
+                      "description": "Total number of payments matching criteria",
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Paginated list of payments with transaction details"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "examples": {
+                        "invalid_customer": "Customer ID must be a positive integer",
+                        "invalid_status": "Invalid status. Valid statuses: ['PENDING', 'COMPLETED', 'FAILED', 'REFUNDED']"
+                      },
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Invalid filter parameters or validation error"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         },
-        "summary": "List payments",
+        "summary": "List payments with filtering and pagination",
         "tags": [
           "Payments"
         ]
       },
       "post": {
+        "description": "Processes a payment transaction with automatic reward calculation and credit limit validation.\n\n**Business Logic:**\n- Validates credit card is active and not expired\n- Checks available credit limit before processing\n- Automatically calculates reward points based on card tier:\n  * PLATINUM: 3x points per dollar\n  * GOLD: 2x points per dollar  \n  * SILVER: 1.5x points per dollar\n  * BASIC: 1x points per dollar\n- Updates available credit in real-time\n- Creates reward record with 365-day expiry\n- Generates unique reference number\n\n**Validation Rules:**\n- Amount must be positive (minimum $0.01)\n- Credit card must exist and be active\n- Available credit must cover payment amount\n- Merchant name is required\n\n**Security Features:**\n- Real-time fraud detection\n- Credit limit enforcement\n- Transaction logging and audit trail\n",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "properties": {
                   "amount": {
+                    "description": "Payment amount in currency units (required, minimum $0.01)",
+                    "example": 25.5,
                     "format": "float",
                     "minimum": 0.01,
                     "type": "number"
                   },
                   "category": {
+                    "default": "general",
+                    "description": "Optional transaction category for analytics",
+                    "example": "dining",
+                    "maxLength": 100,
                     "type": "string"
                   },
                   "credit_card_id": {
+                    "description": "ID of the credit card to charge (required)",
+                    "example": 1,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "description": {
+                    "description": "Optional transaction description or memo",
+                    "example": "Coffee and pastry purchase",
+                    "maxLength": 500,
                     "type": "string"
                   },
                   "merchant_name": {
+                    "description": "Name of merchant or service provider (required)",
+                    "example": "Starbucks Coffee",
+                    "maxLength": 200,
+                    "minLength": 1,
                     "type": "string"
                   }
                 },
@@ -2479,16 +2784,101 @@
         },
         "responses": {
           "201": {
-            "description": "Payment processed successfully"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "amount": {
+                      "description": "Payment amount processed",
+                      "format": "float",
+                      "type": "number"
+                    },
+                    "created_at": {
+                      "description": "Record creation timestamp",
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "credit_card_id": {
+                      "description": "Credit card used for payment",
+                      "type": "integer"
+                    },
+                    "id": {
+                      "description": "Payment transaction ID",
+                      "type": "integer"
+                    },
+                    "merchant_name": {
+                      "description": "Merchant name",
+                      "type": "string"
+                    },
+                    "points_earned": {
+                      "description": "Reward points earned from this transaction",
+                      "type": "integer"
+                    },
+                    "reference_number": {
+                      "description": "Unique transaction reference number",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "Payment status (always COMPLETED for successful payments)",
+                      "enum": [
+                        "COMPLETED"
+                      ],
+                      "type": "string"
+                    },
+                    "transaction_date": {
+                      "description": "Transaction timestamp",
+                      "format": "date-time",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Payment processed successfully with reward points"
           },
           "400": {
-            "description": "Invalid data or insufficient credit"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "examples": {
+                        "inactive_card": "Credit card is not active",
+                        "insufficient_credit": "Insufficient credit available",
+                        "invalid_amount": "Amount must be positive",
+                        "missing_field": "credit_card_id is required"
+                      },
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Payment validation failed or insufficient credit"
           },
           "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "example": "Credit card not found",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
             "description": "Credit card not found"
+          },
+          "500": {
+            "description": "Payment processing failed due to system error"
           }
         },
-        "summary": "Make a payment",
+        "summary": "Process a new payment transaction",
         "tags": [
           "Payments"
         ]
