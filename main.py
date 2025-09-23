@@ -37,11 +37,12 @@ if __name__ == "__main__":
     print("Starting Credit Card Payment System MCP Server...")
     print("Available tools have been registered and are ready for use.")
 
-    # Read port from environment variable, default to 8001 if not set
+    # Read port and transport from environment variables with defaults
     port = int(os.getenv("PORT", 8001))
-    print(f"Starting server on port {port}")
+    transport = os.getenv("TRANSPORT", "sse")
+    print(f"Starting server with transport '{transport}' on port {port}")
 
-    mcp.run(transport="http", port=port)
+    mcp.run(transport=transport, port=port)
 
     # In a real implementation, you might want to run this differently
     # For now, this shows the server is configured and ready
